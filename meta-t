@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+
+width=`tput co`
+cursor=0
+Blue=`echo -e '\e[0;34m'`
+Yellow=`echo -e '\e[1;32m'`
+Color_Off=`echo -e '\e[0m'`
+number_of_windows=
+
+
+
+function update {
+  matches=
+  query=$1
+  selected=$2
+  curr_sess=`tmux display-message -p '#S'`
+  curr_pane=`tmux display-message -p '#S:#I.#P'`
+  curr_win=`tmux display-message -p '#S:#I'`
+  windows=`tmux list-windows -F '#{window_index}'`
+  counter=0
+  win_counter=0
+
+  all_windows=$( tmux list-windows -F "#{window_index}:#{window_name}" -t $curr_sess )
+  number_of_windows=$( echo "$all_windows" |wc -l )
+
+  if [ $(( $number_of_windows )) = 1 ]; then
+    echo "$number_of_windows" 
+    exit 0
+  #elif [ $(( $number_of_windows )) > 2 ]; then
+  fi
+
+  while read window_line ; do
+    window_index=${window_line%:*}
+    window_name=${window_line#*:}
+    window_address=$curr_sess:$window_index
+    
+    if [ "$curr_win" != "$window_address" ]; then
+
+      if [ $(( $number_of_windows )) = 2 ]; then
+        tmux select-window -t $window_address
+        tmux select-pane -t $pane_address
+        exit 0
+      fi
+
+      #echo "`tmux list-panes -F "#{pane_index}" -t $curr_sess:$window_index`"
+      pane_counter=0
+      if [ -z "${buffs[win_counter]}" ]; then
+        for pane_index in `tmux list-panes -F "#{pane_index}" -t $curr_sess:$window_index`; do
+          pane_address=$window_address.$pane_index
+          tmux clear-history -t $pane_address
+          tmux capture-pane -t $pane_address
+          buff="`tmux show-buffer -b 0`"
+          #buffs[$win_counter]=`echo -ne "${buffs[$win_counter]} $buff" |gsed ':a;N;$!ba;s/\n/ /g' |gsed 's/^\s//g'`
+          buffs[$win_counter]="${buffs[win_counter]} ${buff}"
+          pane_counter=$(( pane_counter + 1 ))
+        done
+
+
+        x=$(
+          for word in ${buffs[win_counter]}; do
+            echo "$word"
+          done |gsed -e 's/[^a-z0-9 ]\+/ /ig' |grep -Pvw '\w{1,2}' |sort |uniq -c |gsort -rn |gsed 's/[ 0-9]*//g' |grep -v '^$' |gsed ':a;N;$!ba;s/\n/ /g'
+        )
+
+        buffs[$win_counter]="(${pane_counter}p) $x"
+      fi
+
+      found=
+      g1=`echo "$window_name${buffs[win_counter]}" | grep -Pi "$query"`
+      g2=`echo "${buffs[win_counter]}" | grep -Pi "$query"`
+      if [ ! -z "$g1$g2" ]; then
+        matches="$matches $window_address|nothing"
+        if [ "$counter" = "$cursor" ]; then
+          caret=">>> "
+        else
+          caret="    "
+        fi
+        echo -ne "${Blue}"
+        echo -ne "${caret}${window_index}:${window_name}" |gsed -e "s/\($query\)/$Yellow\1$Color_Off$Blue/gi"
+        echo -ne "${Color_Off}"
+        echo -e " ${buffs[$win_counter]:0:90}" |gsed -e "s/\($query\)/$Yellow\1$Color_Off/gi"
+        counter=$(( counter + 1 ))
+      fi
+      win_counter=$(( win_counter + 1 ))
+    fi
+  done <<< "$matches" < <( echo "$all_windows" )
+
+  counter=0
+  for match in $matches; do
+    window_address=${match%|*}
+    pane_address=${match#*|}
+
+    if [ ! -z "$selected" ]; then
+      if [ "$counter" = "$cursor" ]; then
+        tmux select-window -t $window_address
+        tmux select-pane -t $pane_address
+        exit 0
+      fi
+      counter=$(( counter + 1 ))
+    fi
+
+  done
+}
+
+function read_char {
+  read -s -n 1 c
+  printf '%d' "'$c'"
+}
+
+stty -echo
+tput civis
+while [ -z '' ]; do
+  #if [ -z "$saved_query" -o "$saved_query" != "$query" ]; then
+    update "$query" "$selected"
+    saved_query="$query"
+  #fi
+
+  read -s -n 1 c
+  code=`printf '%d' "'$c'"`
+
+  clear
+  #echo $code
+  selected=
+
+  if [ "$code" = "127" ]; then
+    query=${query%?}
+  elif [ "$code" = "39" ]; then
+    selected=true
+  elif [ "$code" = "27" ]; then
+
+    code2=`read_char`
+    code3=`read_char`
+
+    if [ "$code $code2 $code3" = "27 91 66" ]; then
+      cursor=$(( cursor < number_of_windows - 6 ? cursor + 1 : number_of_windows-2 ))
+    elif [ "$code $code2 $code3" = "27 91 65" ]; then
+      cursor=$(( cursor > 0 ? cursor-1 : 0 ))
+    else
+      exit 0
+    fi
+  else
+    query="${query}${c}"
+    cursor=0
+  fi
+
+done
+stty echo
+tput cnorm
