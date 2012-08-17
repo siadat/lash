@@ -6,8 +6,8 @@ A __window__ and __pane__ finder for Tmux, inspired by ([ctrlp](https://github.c
     tmux source-file ~/.tmux.conf
 ```
 Notes:
-* Replace `C-f` with anything you prefer.
-* Replace `~/path/to/fmux/f.sh` with the actual path.
+* Replace `~/path/to/fmux/f.sh` with the actual path to fmux.
+* Replace `C-f` with anything you prefer. I suggest `M-p`.
 
 ### Usage
 Press `C-f` to start the window finder.  Press CTRL-c to close.  You could also run `f.sh` from any shell.
