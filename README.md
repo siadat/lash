@@ -1,22 +1,16 @@
-# meta-p
+A __window__ and __pane__ finder for Tmux, inspired by ([ctrlp](https://github.com/kien/ctrlp.vim/)).  The goal is to make navigation between many Tmux windows efficient and fast.
 
-A __window__ and __pane__ finder for Tmux, inspired by ([ctrlp](https://github.com/kien/ctrlp.vim/)).  The goal is to make navigation between many Tmux windows more efficient.
+### Installation
+``` bash
+    cat 'bind-key -n C-f split-window -l 10 ~/path/to/fmux/f.sh' >> ~/.tmux.conf
+    tmux source-file ~/.tmux.conf
+```
+Notes:
+* Replace `C-f` with anything you prefer.
+* Replace `~/path/to/fmux/f.sh` with the actual path.
 
 ### Usage
-
-Append this line to your `~/.tmux.conf`:
-
-```
-    bind-key -n M-p split-window -l 10 ~/.tmux/meta-t
-```
-
-You could also run meta-p from any shell:
-
-``` bash
-    $ ~/.tmux/meta-t
-```
-
-Replace `M-p` with anything you would like. If you are on a Mac and you want to use the meta key make sure you enable "Use option as meta key" in Termianl preferences.
+Press `C-f` to start the window finder.  Press CTRL-c to close.  You could also run `f.sh` from any shell.
 
 Tested with Bash 4.2.37, GNU Sed 4.2.1 and GNU Grep 2.5.1.
 
