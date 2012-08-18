@@ -1,11 +1,11 @@
 #!/usr/bin/env bash -e
-
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ -e "$dir/utils.sh" ]; then
   source "$dir/utils.sh"
 else
   echo "Could not find $dir/utils.sh"
+  read
   exit 1
 fi
 
@@ -14,10 +14,11 @@ init
 mode_rename=false
 mode_new_win=false
 mode_selected=false
+redraw=false
 
 while true; do
 
-  if $mode_new_win || $mode_rename || $mode_selected || [ "$saved_query" != "$query" -o "$saved_cursor" != "$cursor" ]; then
+  if $redraw || $mode_new_win || $mode_rename || $mode_selected || [ "$saved_query" != "$query" -o "$saved_cursor" != "$cursor" ]; then
     tput cup 0 0
     update "$query" $mode_selected $mode_rename $mode_new_win
     saved_query="$query"
@@ -36,13 +37,16 @@ while true; do
 
   elif [ "$code" = "96" ]; then # backquote
     if $mode_rename; then
-      mode_new_win=true
+      if $mode_new_win; then
+        mode_new_win=false
+        mode_rename=false
+        redraw=true
+      else
+        mode_new_win=true
+      fi
     else
       mode_rename=true
     fi
-
-  # elif [ "$code" = "58" ]; then # colon
-  #   mode_new_win=true
 
   elif [ "$code" = "27" ]; then
     code2=`read_char`

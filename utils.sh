@@ -5,6 +5,7 @@ Color_Off=`echo -e '\e[0m'`
 Width=`tput co`
 Height=`tput li`
 prompt_color="$Yellow"
+SEARCH_PANES=false
 
 function read_char {
   read -s -n 1 c
@@ -29,10 +30,6 @@ function cho {
   echo -en "$1"
   tput el
   echo
-}
-
-function clear_lines_bellow {
-  echo $( for i in {${#1}..$Width}; do echo -n " "; done; echo )
 }
 
 function update {
@@ -85,9 +82,15 @@ function update {
         if [ -z "${buffs[win_counter]}" ]; then
           for pane_index in `tmux list-panes -F "#{pane_index}" -t $curr_sess:$window_index`; do
             pane_address=$window_address.$pane_index
-            tmux clear-history -t $pane_address
-            tmux capture-pane -t $pane_address
-            buff="`tmux show-buffer -b 0`"
+
+            if $SEARCH_PANES; then
+              tmux clear-history -t $pane_address
+              tmux capture-pane -t $pane_address
+              buff="`tmux show-buffer -b 0`"
+            else
+              buff=
+            fi
+
             buffs[$win_counter]="${buffs[win_counter]} ${buff}"
             pane_counter=$(( pane_counter + 1 ))
           done
@@ -97,7 +100,7 @@ function update {
           )
           # To lower case
           x=${x,,} || true
-          buffs[$win_counter]="(${pane_counter}p) $x"
+          buffs[$win_counter]="x ${pane_counter} $x"
         fi
 
         found=
@@ -111,7 +114,11 @@ function update {
           is_match=true
         else
           g1=$( echo "$window_name" |grep -oPi "$query" || true )
-          g2=$( echo "${buffs[win_counter]}" |grep -oPi "$query" || true )
+          if $SEARCH_PANES; then
+            g2=$( echo "${buffs[win_counter]}" |grep -oPi "$query" || true )
+          else
+            g2=""
+          fi
 
           matchness=$(( ${#g1} * 10000 + ${#g2} ))
           if [ $matchness -gt 0 ]; then
@@ -127,15 +134,7 @@ function update {
     done <<< "$matches" < <( echo "$all_windows" )
   fi
 
-  if $selected && $mode_rename; then
-    if [ -n "$query" ]; then
-      tmux set-window-option -t $curr_win allow-rename off
-      tmux rename-window -t $curr_win "$query"
-    else
-      tmux set-window-option -t $curr_win allow-rename on
-    fi
-    quit 0
-  elif $selected && $mode_new_win; then
+  if $selected && $mode_new_win; then
     if [ -n "$query" ]; then
       tmux new-window -n "$query"
       tmux set-window-option allow-rename off
@@ -143,8 +142,15 @@ function update {
       tmux new-window
     fi
     quit 0
+  elif $selected && $mode_rename; then
+    if [ -n "$query" ]; then
+      tmux set-window-option -t $curr_win allow-rename off
+      tmux rename-window -t $curr_win "$query"
+    else
+      tmux set-window-option -t $curr_win allow-rename on
+    fi
+    quit 0
   fi
-
 
   line="${prompt}${query}_"
 
@@ -176,7 +182,11 @@ function update {
     line+="${color}"
     line+=`echo -e "${caret}${window_index}:${window_name}" |sed -e "s/\($query\)/$Yellow\1$Color_Off${color}/g" || true`
     line+="${Color_Off}"
-    line+=`echo -e " $snippet" |sed -e "s/\($query\)/$Yellow\1$Color_Off/g"`
+    if $SEARCH_PANES; then
+      line+=`echo -e " $snippet" |sed -e "s/\($query\)/$Yellow\1$Color_Off/g"`
+    else
+      line+=`echo -e " $snippet"`
+    fi
     cho "$line"
 
 
