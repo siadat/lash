@@ -6,6 +6,7 @@ Width=`tput co`
 Height=`tput li`
 prompt_color="$Yellow"
 SEARCH_PANES=false
+PID=$$
 
 function read_char {
   read -s -n 1 c
@@ -24,6 +25,11 @@ function quit {
   stty echo
   tput cnorm
   exit $1
+}
+
+function oops {
+  read -p "$1"
+  quit 1
 }
 
 function cho {

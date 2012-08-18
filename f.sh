@@ -1,11 +1,15 @@
 #!/usr/bin/env bash -e
-dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [ -e "$dir/utils.sh" ]; then
-  source "$dir/utils.sh"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+if [ -e "$DIR/utils.sh" ]; then
+  source "$DIR/utils.sh"
 else
-  echo "Could not find $dir/utils.sh"
-  read
+  read -p "Could not find $DIR/utils.sh"
+  exit 1
+fi
+
+if [ $(( $( ps | grep -wv $PID | grep "$0" | wc -l ) )) -gt 2 ]; then
   exit 1
 fi
 
@@ -29,10 +33,10 @@ while true; do
   read -s -n 1 c
   code=`printf '%d' "'$c'"`
 
-  if [ "$code" = "127" ]; then
+  if [ "$code" = "127" ]; then # Backspace
     query=${query%?}
 
-  elif [ "$code" = "39" ]; then
+  elif [ "$code" = "39" ]; then # Enter
     mode_selected=true
 
   elif [ "$code" = "96" ]; then # backquote
@@ -48,7 +52,7 @@ while true; do
       mode_rename=true
     fi
 
-  elif [ "$code" = "27" ]; then
+  elif [ "$code" = "27" ]; then # Escape
     code2=`read_char`
     code3=`read_char`
     if [ "$code $code2 $code3" = "27 91 66" ]; then # Down

@@ -2,7 +2,7 @@ A __window__ and __pane__ finder for Tmux, inspired by [ctrlp](https://github.co
 
 ### Installation
 ``` bash
-    $ echo 'bind-key -n M-p split-window -l 10 ~/path/to/fmux/f.sh' >> ~/.tmux.conf
+    $ echo 'bind-key -n C-` split-window -l 10 ~/path/to/fmux/f.sh' >> ~/.tmux.conf
 ```
 And reload your config:
 ``` bash
@@ -11,10 +11,10 @@ And reload your config:
 
 #### Notes:
 * Replace ~/path/to/fmux/f.sh with the actual path to fmux.
-* Replace `M-p` with anything you prefer.
+* Replace C-` with anything you prefer. I suggest `M-p` which is similar to `C-p`.
 
 ### Usage
-* __open__: Press `M-p` (meta-p, alt-p or your preferred binding) to start fmux
+* __open__: Press C-` (ctrl-backquote or your preferred binding) to start fmux
 * __search__: Start typing part of the window title or current content of the pane
 * __select__: Press the RETURN key
 * __rename window__: ` (backquote) to rename current window
@@ -23,7 +23,7 @@ And reload your config:
 * You may run `f.sh` from a normal shell
 
 ### Contributions
-* All sorts of feedback, contribution and bug reports are highly appreciated
+* Feedbacks, bug reports, and patches are highly appreciated
 * Tested with Tmux 1.6+, Bash 4.2.37, GNU Sed 4.2.1, BSD Sed (2005), BSD tr (2004), GNU tr from coreutils 8.17 and GNU Grep 2.5.1 on OSX and Gentoo
 
 Copyrigh (c) 2012 Sina Siadat
