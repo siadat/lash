@@ -11,7 +11,7 @@ And reload your config:
 
 #### Notes:
 * Replace ~/path/to/fmux/f.sh with the actual path to fmux.
-* Replace C-` with anything you prefer. I suggest `M-p` which is similar to `C-p`.
+* Replace C-` with anything you prefer. I suggest M-p.
 
 ### Usage
 * __open__: Press C-` (ctrl-backquote or your preferred binding) to start fmux
