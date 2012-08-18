@@ -121,7 +121,8 @@ function update {
           g1=true;
           is_match=true
         else
-          g1=$( echo "$window_name" |grep -oPi "$query" || true )
+          q=$( echo "$query" |sed -e 's/\(.\)/.*\1/g' )
+          g1=$( echo "$window_name" |grep -oPi "$q" || true )
           if $SEARCH_PANES; then
             g2=$( echo "${buffs[win_counter]}" |grep -oPi "$query" || true )
           else
