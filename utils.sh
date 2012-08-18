@@ -37,7 +37,7 @@ function clear_lines_bellow {
 
 function update {
   matches=
-  query=$1
+  query=${1,,}
   selected=$2
   mode_rename=$3
   mode_new_win=$4
@@ -93,14 +93,10 @@ function update {
           done
 
           x=$(
-            echo "${buffs[win_counter]}" |sed -e ':a;N;$!ba;s/\n/ /g'  |sed -e 's/  */ /g'
+            echo "${buffs[win_counter]}" |tr -d '[\r\n]' |sed -e 's/  */ /g'
           )
-          #x=$(
-          #  for word in ${buffs[win_counter]}; do
-          #    echo "$word"
-          #  done |sed -e 's/[^a-z0-9 ]\+/ /ig' |grep -Pvw '\w{1,2}' |sort |uniq -c |gsort -rn |sed 's/[ 0-9]*//g' |grep -v '^$' |sed ':a;N;$!ba;s/\n/ /g'
-          #)
-
+          # To lower case
+          x=${x,,} || true
           buffs[$win_counter]="(${pane_counter}p) $x"
         fi
 
@@ -152,8 +148,7 @@ function update {
 
   line="${prompt}${query}_"
 
-  echo -n $line
-  echo "                  "
+  cho "$line"
 
   readarray -t sorted < <(for a in $matches; do echo "$a"; done | sort -rn)
   for counter in "${!sorted[@]}"; do
@@ -179,9 +174,9 @@ function update {
 
     line=
     line+="${color}"
-    line+=`echo -e "${caret}${window_index}:${window_name}" |sed -e "s/\($query\)/$Yellow\1$Color_Off${color}/gi"`
+    line+=`echo -e "${caret}${window_index}:${window_name}" |sed -e "s/\($query\)/$Yellow\1$Color_Off${color}/g" || true`
     line+="${Color_Off}"
-    line+=`echo -e " $snippet" |sed -e "s/\($query\)/$Yellow\1$Color_Off/gi"`
+    line+=`echo -e " $snippet" |sed -e "s/\($query\)/$Yellow\1$Color_Off/g"`
     cho "$line"
 
 

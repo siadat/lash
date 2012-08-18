@@ -1,4 +1,4 @@
-A __window__ and __pane__ finder for Tmux, inspired by [ctrlp](https://github.com/kien/ctrlp.vim/).  The goal is to make navigation between many Tmux windows efficient and fast, without having to remember the window number or position in tmux status.
+A __window__ and __pane__ finder for Tmux, inspired by [ctrlp](https://github.com/kien/ctrlp.vim/).  The goal is to make navigation between many Tmux windows efficient and fast, without having to remember the window number or position in tmux status line.
 
 ### Installation
 ``` bash
@@ -24,6 +24,6 @@ And reload your config:
 
 ### Contributions
 * All sorts of feedback, contribution and bug reports are highly appreciated
-* Tested with Tmux 1.6+, Bash 4.2.37, GNU Sed 4.2.1 and GNU Grep 2.5.1 on OSX and Gentoo
+* Tested with Tmux 1.6+, Bash 4.2.37, GNU Sed 4.2.1, BSD Sed (2005), BSD tr (2004), GNU tr from coreutils 8.17 and GNU Grep 2.5.1 on OSX and Gentoo
 
 Copyrigh (c) 2012 Sina Siadat
