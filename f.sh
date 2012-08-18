@@ -40,16 +40,16 @@ while true; do
     mode_selected=true
 
   elif [ "$code" = "96" ]; then # backquote
-    if $mode_rename; then
-      if $mode_new_win; then
+    if $mode_new_win; then
+      if $mode_rename; then
         mode_new_win=false
         mode_rename=false
         redraw=true
       else
-        mode_new_win=true
+        mode_rename=true
       fi
     else
-      mode_rename=true
+      mode_new_win=true
     fi
 
   elif [ "$code" = "27" ]; then # Escape
