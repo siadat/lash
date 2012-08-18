@@ -35,10 +35,14 @@ while true; do
     mode_selected=true
 
   elif [ "$code" = "96" ]; then # backquote
-    mode_rename=true
+    if $mode_rename; then
+      mode_new_win=true
+    else
+      mode_rename=true
+    fi
 
-  elif [ "$code" = "58" ]; then # colon
-    mode_new_win=true
+  # elif [ "$code" = "58" ]; then # colon
+  #   mode_new_win=true
 
   elif [ "$code" = "27" ]; then
     code2=`read_char`
