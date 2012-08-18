@@ -11,6 +11,8 @@ A __window__ and __pane__ finder for Tmux, inspired by [ctrlp](https://github.co
 ### Usage
 Press `M-f` to start the window finder.  Press CTRL-c to close.  You could also run `f.sh` from a normal shell.
 
+Once fmux is open, you can press ` (backquote) to rename a window.
+
 Tested with Bash 4.2.37, GNU Sed 4.2.1 and GNU Grep 2.5.1.
 
 Copyrigh (c) 2012 Sina Siadat

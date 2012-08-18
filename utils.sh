@@ -30,6 +30,7 @@ function update {
   matches=
   query=$1
   selected=$2
+  mode_rename=$3
   curr_sess=`tmux display-message -p '#S'`
   curr_pane=`tmux display-message -p '#S:#I.#P'`
   curr_win=`tmux display-message -p '#S:#I'`
@@ -45,74 +46,90 @@ function update {
     quit 0
   fi
 
-  while read window_line ; do
-    window_index=${window_line%:*}
-    window_name=${window_line#*:}
-    window_address=$curr_sess:$window_index
+  if $mode_rename; then
+    prompt="Rename window >>> "
+  else
+    prompt=">>> "
+    while read window_line ; do
+      window_index=${window_line%:*}
+      window_name=${window_line#*:}
+      window_address=$curr_sess:$window_index
 
-    if [ "$curr_win" != "$window_address" ]; then
+      if [ "$curr_win" != "$window_address" ]; then
 
-      if [ -z "${window_names[win_counter]}" ]; then
-        window_names[$win_counter]="${window_name}"
-      fi
-
-      if [ $(( $nbr_of_windows )) = 2 ]; then
-        tmux select-window -t $window_address
-        tmux select-pane -t $pane_address
-        quit 0
-      fi
-
-      #echo "`tmux list-panes -F "#{pane_index}" -t $curr_sess:$window_index`"
-      pane_counter=0
-      if [ -z "${buffs[win_counter]}" ]; then
-        for pane_index in `tmux list-panes -F "#{pane_index}" -t $curr_sess:$window_index`; do
-          pane_address=$window_address.$pane_index
-          tmux clear-history -t $pane_address
-          tmux capture-pane -t $pane_address
-          buff="`tmux show-buffer -b 0`"
-          buffs[$win_counter]="${buffs[win_counter]} ${buff}"
-          pane_counter=$(( pane_counter + 1 ))
-        done
-
-        x=$(
-          echo "${buffs[win_counter]}" |sed -e ':a;N;$!ba;s/\n/ /g'  |sed -e 's/  */ /g'
-        )
-        #x=$(
-        #  for word in ${buffs[win_counter]}; do
-        #    echo "$word"
-        #  done |sed -e 's/[^a-z0-9 ]\+/ /ig' |grep -Pvw '\w{1,2}' |sort |uniq -c |gsort -rn |sed 's/[ 0-9]*//g' |grep -v '^$' |sed ':a;N;$!ba;s/\n/ /g'
-        #)
-
-        buffs[$win_counter]="(${pane_counter}p) $x"
-      fi
-
-      found=
-      matchness=0
-      is_match=false
-      g1=false
-      g2=false
-
-      if [ -z "$query" ]; then
-        g1=true;
-        is_match=true
-      else
-        g1=$( echo "$window_name" |grep -oPi "$query" || true )
-        g2=$( echo "${buffs[win_counter]}" |grep -oPi "$query" || true )
-
-        matchness=$(( ${#g1} * 10000 + ${#g2} ))
-        if [ $matchness -gt 0 ]; then
-          is_match=true
+        if [ -z "${window_names[win_counter]}" ]; then
+          window_names[$win_counter]="${window_name}"
         fi
-      fi
 
-      if $is_match; then
-        matches="$matches $matchness|$window_address|dummypane|$win_counter|$window_index"
+        if [ $(( $nbr_of_windows )) = 2 ]; then
+          tmux select-window -t $window_address
+          tmux select-pane -t $pane_address
+          quit 0
+        fi
+
+        #echo "`tmux list-panes -F "#{pane_index}" -t $curr_sess:$window_index`"
+        pane_counter=0
+        if [ -z "${buffs[win_counter]}" ]; then
+          for pane_index in `tmux list-panes -F "#{pane_index}" -t $curr_sess:$window_index`; do
+            pane_address=$window_address.$pane_index
+            tmux clear-history -t $pane_address
+            tmux capture-pane -t $pane_address
+            buff="`tmux show-buffer -b 0`"
+            buffs[$win_counter]="${buffs[win_counter]} ${buff}"
+            pane_counter=$(( pane_counter + 1 ))
+          done
+
+          x=$(
+            echo "${buffs[win_counter]}" |sed -e ':a;N;$!ba;s/\n/ /g'  |sed -e 's/  */ /g'
+          )
+          #x=$(
+          #  for word in ${buffs[win_counter]}; do
+          #    echo "$word"
+          #  done |sed -e 's/[^a-z0-9 ]\+/ /ig' |grep -Pvw '\w{1,2}' |sort |uniq -c |gsort -rn |sed 's/[ 0-9]*//g' |grep -v '^$' |sed ':a;N;$!ba;s/\n/ /g'
+          #)
+
+          buffs[$win_counter]="(${pane_counter}p) $x"
+        fi
+
+        found=
+        matchness=0
+        is_match=false
+        g1=false
+        g2=false
+
+        if [ -z "$query" ]; then
+          g1=true;
+          is_match=true
+        else
+          g1=$( echo "$window_name" |grep -oPi "$query" || true )
+          g2=$( echo "${buffs[win_counter]}" |grep -oPi "$query" || true )
+
+          matchness=$(( ${#g1} * 10000 + ${#g2} ))
+          if [ $matchness -gt 0 ]; then
+            is_match=true
+          fi
+        fi
+
+        if $is_match; then
+          matches="$matches $matchness|$window_address|dummypane|$win_counter|$window_index"
+        fi
+        win_counter=$(( win_counter + 1 ))
       fi
-      win_counter=$(( win_counter + 1 ))
+    done <<< "$matches" < <( echo "$all_windows" )
+  fi
+
+  if $selected && $mode_rename; then
+    if [ -n "$query" ]; then
+      tmux set-window-option -t $curr_win allow-rename off
+      tmux rename-window -t $curr_win "$query"
+    else
+      tmux set-window-option -t $curr_win allow-rename on
     fi
-  done <<< "$matches" < <( echo "$all_windows" )
+    quit 0
+  fi
 
-  echo ">>> ${query}_"
+
+  echo "${prompt}${query}_"
   readarray -t sorted < <(for a in $matches; do echo "$a"; done | sort -rn)
   for counter in "${!sorted[@]}"; do
     IFS='|' read -a arr <<< "${sorted[counter]}"
@@ -140,7 +157,7 @@ function update {
     echo -ne "${Color_Off}"
     echo -e  " $snippet" |sed -e "s/\($query\)/$Yellow\1$Color_Off/gi"
 
-    if [ -n "$selected" ]; then
+    if $selected; then
       if [ "$counter" = "$cursor" ]; then
         tmux select-window -t $window_address
         # tmux select-pane -t $pane_address

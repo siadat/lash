@@ -11,16 +11,20 @@ fi
 
 init
 
+mode_rename=false
+mode_selected=false
+
 while true; do
 
-  if [ -n "$selected" -o "$saved_query" != "$query" -o "$saved_cursor" != "$cursor" ]; then
+  if $mode_rename || $mode_selected || [ "$saved_query" != "$query" -o "$saved_cursor" != "$cursor" ]; then
     clear
-    update "$query" "$selected"
+    update "$query" $mode_selected $mode_rename
     saved_query="$query"
     saved_cursor="$cursor"
   fi
 
-  selected=
+  mode_selected=false
+  #mode_rename=$( false || mode_rename )
   read -s -n 1 c
   code=`printf '%d' "'$c'"`
 
@@ -28,7 +32,10 @@ while true; do
     query=${query%?}
 
   elif [ "$code" = "39" ]; then
-    selected=true
+    mode_selected=true
+
+  elif [ "$code" = "96" ]; then
+    mode_rename=true
 
   elif [ "$code" = "27" ]; then
     code2=`read_char`
