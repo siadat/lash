@@ -3,6 +3,7 @@ On_Blue=`echo -e '\e[44m'`
 Yellow=`echo -e '\e[1;32m'`
 Color_Off=`echo -e '\e[0m'`
 Width=`tput co`
+prompt_color="$Yellow"
 
 function read_char {
   read -s -n 1 c
@@ -31,6 +32,7 @@ function update {
   query=$1
   selected=$2
   mode_rename=$3
+  mode_new_win=$4
   curr_sess=`tmux display-message -p '#S'`
   curr_pane=`tmux display-message -p '#S:#I.#P'`
   curr_win=`tmux display-message -p '#S:#I'`
@@ -46,10 +48,13 @@ function update {
     quit 0
   fi
 
-  if $mode_rename; then
-    prompt="Rename window >>> "
+  if $mode_new_win; then
+    prompt="${prompt_color}New win >>> ${Color_Off}"
+  elif $mode_rename; then
+    prompt="${prompt_color}Rename this win >>> ${Color_Off}"
   else
-    prompt=">>> "
+    prompt="${prompt_color}>>> ${Color_Off}"
+
     while read window_line ; do
       window_index=${window_line%:*}
       window_name=${window_line#*:}
@@ -124,6 +129,14 @@ function update {
       tmux rename-window -t $curr_win "$query"
     else
       tmux set-window-option -t $curr_win allow-rename on
+    fi
+    quit 0
+  elif $selected && $mode_new_win; then
+    if [ -n "$query" ]; then
+      tmux new-window -n "$query"
+      tmux set-window-option allow-rename off
+    else
+      tmux new-window
     fi
     quit 0
   fi
