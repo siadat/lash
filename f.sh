@@ -22,7 +22,7 @@ function update {
   nbr_of_windows=$( echo "$all_windows" |wc -l )
 
   if [ $(( $nbr_of_windows )) = 1 ]; then
-    echo "$nbr_of_windows" 
+    echo "$nbr_of_windows"
     quit 0
   fi
 
@@ -30,7 +30,7 @@ function update {
     window_index=${window_line%:*}
     window_name=${window_line#*:}
     window_address=$curr_sess:$window_index
-    
+
     if [ "$curr_win" != "$window_address" ]; then
 
       if [ -z "${window_names[win_counter]}" ]; then
@@ -69,29 +69,24 @@ function update {
 
       found=
       matchness=0
-      is_match=
+      is_match=false
       g1=false
       g2=false
 
-      if [ -z "$query" ];
-        then g1=true;
+      if [ -z "$query" ]; then
+        g1=true;
         is_match=true
       else
-        if [ "`echo "$window_name" |grep -oPi "$query"`" ]; then g1=true; fi
-        if [ "`echo "${buffs[win_counter]}" |grep -oPi "$query"`" ]; then g2=true; fi
+        g1=$( echo "$window_name" |grep -oPi "$query" || true )
+        g2=$( echo "${buffs[win_counter]}" |grep -oPi "$query" || true )
 
-        if $g1; then
-          matchness=$(( matchness + 1000 ))
-          is_match=true
-        fi
-
-        if $g2; then
-          matchness=$(( matchness + 1 ))
+        matchness=$(( ${#g1} * 10000 + ${#g2} ))
+        if [ $matchness -gt 0 ]; then
           is_match=true
         fi
       fi
 
-      if [ -n "$is_match" ]; then
+      if $is_match; then
         matches="$matches $matchness|$window_address|dummypane|$win_counter|$window_index"
       fi
       win_counter=$(( win_counter + 1 ))
