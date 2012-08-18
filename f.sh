@@ -1,7 +1,12 @@
 #!/usr/bin/env bash -e
 
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $dir/utils.sh
+if [ -e "$dir/utils.sh" ]; then
+  source "$dir/utils.sh"
+else
+  echo "Could not find $dir/utils.sh"
+  exit 1
+fi
 
 nbr_of_windows=
 matches=
