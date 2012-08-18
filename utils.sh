@@ -3,6 +3,7 @@ On_Blue=`echo -e '\e[44m'`
 Yellow=`echo -e '\e[1;32m'`
 Color_Off=`echo -e '\e[0m'`
 Width=`tput co`
+Height=`tput li`
 prompt_color="$Yellow"
 
 function read_char {
@@ -12,6 +13,7 @@ function read_char {
 
 function init {
   stty -echo
+  tput clear
   tput civis
   matches=
   cursor=0
@@ -24,7 +26,13 @@ function quit {
 }
 
 function cho {
-  echo $@
+  echo -en "$1"
+  tput el
+  echo
+}
+
+function clear_lines_bellow {
+  echo $( for i in {${#1}..$Width}; do echo -n " "; done; echo )
 }
 
 function update {
@@ -142,7 +150,11 @@ function update {
   fi
 
 
-  echo "${prompt}${query}_"
+  line="${prompt}${query}_"
+
+  echo -n $line
+  echo "                  "
+
   readarray -t sorted < <(for a in $matches; do echo "$a"; done | sort -rn)
   for counter in "${!sorted[@]}"; do
     IFS='|' read -a arr <<< "${sorted[counter]}"
@@ -165,10 +177,13 @@ function update {
     snippet_len=$(( $len > 50 ? 50 : $len ))
     snippet=${buffs[win_counter]:$len - $snippet_len}
 
-    echo -ne "${color}"
-    echo -ne "${caret}${window_index}:${window_name}" |sed -e "s/\($query\)/$Yellow\1$Color_Off${color}/gi"
-    echo -ne "${Color_Off}"
-    echo -e  " $snippet" |sed -e "s/\($query\)/$Yellow\1$Color_Off/gi"
+    line=
+    line+="${color}"
+    line+=`echo -e "${caret}${window_index}:${window_name}" |sed -e "s/\($query\)/$Yellow\1$Color_Off${color}/gi"`
+    line+="${Color_Off}"
+    line+=`echo -e " $snippet" |sed -e "s/\($query\)/$Yellow\1$Color_Off/gi"`
+    cho "$line"
+
 
     if $selected; then
       if [ "$counter" = "$cursor" ]; then
@@ -178,4 +193,5 @@ function update {
       fi
     fi
   done
+  tput cd || tput ed || true
 }

@@ -18,7 +18,7 @@ mode_selected=false
 while true; do
 
   if $mode_new_win || $mode_rename || $mode_selected || [ "$saved_query" != "$query" -o "$saved_cursor" != "$cursor" ]; then
-    clear
+    tput cup 0 0
     update "$query" $mode_selected $mode_rename $mode_new_win
     saved_query="$query"
     saved_cursor="$cursor"
