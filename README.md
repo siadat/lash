@@ -2,11 +2,11 @@ A __window__ and __pane__ finder for Tmux, inspired by [ctrlp](https://github.co
 
 ### Installation
 ``` bash
-    echo 'bind-key -n M-p split-window -l 10 ~/path/to/fmux/f.sh' >> ~/.tmux.conf
+    $ echo 'bind-key -n M-p split-window -l 10 ~/path/to/fmux/f.sh' >> ~/.tmux.conf
 ```
 And reload your config:
 ``` bash
-    tmux source-file ~/.tmux.conf
+    $ tmux source-file ~/.tmux.conf
 ```
 
 #### Notes:
