@@ -15,7 +15,7 @@ And reload your config:
 
 ### Usage
 * __open__: Press C-` (ctrl-backquote or your preferred binding) to start fmux
-* __search__: Type any part of the window title, e.g. `pj` to find `project` window
+* __search__: Type any part of the window title, e.g. type `pj` to find your `project` window
 * __select__: Press the RETURN key
 * __rename window__: ` (backquote) to rename current window
 * __new window__: `` (two backquotes) to create a new window
