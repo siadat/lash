@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -e
 
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $dir/utils.sh
@@ -56,7 +56,7 @@ function update {
         done
 
         x=$(
-          echo "${buffs[win_counter]}" |sed ':a;N;$!ba;s/\n/ /g'  |sed 's/  */ /g'
+          echo "${buffs[win_counter]}" |sed -e ':a;N;$!ba;s/\n/ /g'  |sed -e 's/  */ /g'
         )
         #x=$(
         #  for word in ${buffs[win_counter]}; do
@@ -70,18 +70,25 @@ function update {
       found=
       matchness=0
       is_match=
+      g1=false
+      g2=false
 
-      g1=`echo "$window_name" | grep  -Pi "$query"`
-      g2=`echo "${buffs[win_counter]}" | grep -Poi "$query"`
-
-      if [ -n "$g1" ]; then
-        matchness=$(( matchness + 1000 ))
+      if [ -z "$query" ];
+        then g1=true;
         is_match=true
-      fi
+      else
+        if [ "`echo "$window_name" |grep -oPi "$query"`" ]; then g1=true; fi
+        if [ "`echo "${buffs[win_counter]}" |grep -oPi "$query"`" ]; then g2=true; fi
 
-      if [ -n "$g2" ]; then
-        matchness=$(( matchness + 1 ))
-        is_match=true
+        if $g1; then
+          matchness=$(( matchness + 1000 ))
+          is_match=true
+        fi
+
+        if $g2; then
+          matchness=$(( matchness + 1 ))
+          is_match=true
+        fi
       fi
 
       if [ -n "$is_match" ]; then
