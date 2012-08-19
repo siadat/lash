@@ -5,7 +5,7 @@ Color_Off=`echo -e '\e[0m'`
 Width=`tput co`
 Height=`tput li`
 prompt_color="$Yellow"
-SEARCH_PANES=false
+SEARCH_PANES=true
 PID=$$
 
 function read_char {
@@ -192,9 +192,15 @@ function update {
     line+=`echo -e "${caret}${window_index}:${window_name}" |sed -e "s/\($query\)/$Yellow\1$Color_Off${color}/g" || true`
     line+="${Color_Off}"
     if $SEARCH_PANES; then
-      line+=`echo -e " $snippet" |sed -e "s/\($query\)/$Yellow\1$Color_Off/g"`
+      if [ $matchness -eq 0 ]; then
+        line+=`echo -e " "`
+      elif [ $matchness -gt 1000 ]; then
+        line+=`echo -e " "`
+      else
+        line+=`echo -e " - pane content"`
+      fi
     else
-      line+=`echo -e " $snippet"`
+      line+=`echo -e " "`
     fi
     cho "$line"
 
