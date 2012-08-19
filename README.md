@@ -2,13 +2,12 @@ A __window__ and __pane__ finder for complex Tmux sessions, inspired by [ctrlp](
 
 ![Screenshot](http://i.imgur.com/cv55F.png)
 
-The goal is to make navigation between many Tmux windows efficient, without having to remember the window numbers or positions.
-
 ### Install
 ``` bash
-    $ ./install.sh 'M-Tab'  # change M-Tab to whatever you prefer
+    $ ./install.sh 'M-Tab'
 ```
-This adds a line to your `~/.tmux.conf`.
+* Change M-Tab to whatever key binding you prefer.
+* The install script adds a line to your `~/.tmux.conf`.
 
 ### Usage
 * __open__: Press M-Tab (or your preferred binding) to start fmux
