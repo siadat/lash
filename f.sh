@@ -44,14 +44,23 @@ while true; do
 
   elif [ "$code" = "27" ]; then # Escape
     code2=`read_char`
+
+    if [ $code2 = 27 ]; then # Escape, again
+      quit 0
+    fi
+
     code3=`read_char`
+
     if [ "$code $code2 $code3" = "27 91 66" ]; then # Down
       nbr_of_matches=`echo "$matches" |wc -w`
       cursor=$(( cursor < nbr_of_matches - 1 ? cursor + 1 : nbr_of_matches - 1 ))
+
     elif [ "$code $code2 $code3" = "27 91 65" ]; then # Up
       cursor=$(( cursor > 0 ? cursor - 1 : 0 ))
+
     else
       quit 0
+
     fi
 
   else
