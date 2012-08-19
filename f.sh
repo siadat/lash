@@ -30,7 +30,7 @@ while true; do
   fi
 
   mode_selected=false
-  read -s -n 1 c
+  IFS= read -s -n 1 c
   code=`printf '%d' "'$c'"`
 
   if [ "$code" = "127" ]; then # Backspace
@@ -39,7 +39,7 @@ while true; do
   elif [ "$code" = "39" ]; then # Enter
     mode_selected=true
 
-  elif [ "$code" = "96" ]; then # backquote
+  elif [ "$code" = "9" ]; then # Tab
     mode_count=$(( (mode_count + 1) % 4 ))
 
   elif [ "$code" = "27" ]; then # Escape
