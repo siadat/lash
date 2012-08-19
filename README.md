@@ -1,24 +1,17 @@
-A __window__ and __pane__ finder for Tmux, inspired by [ctrlp](https://github.com/kien/ctrlp.vim/).
+A __window__ and __pane__ finder for complex Tmux sessions, inspired by [ctrlp](https://github.com/kien/ctrlp.vim/).
 
 ![Screenshot](http://i.imgur.com/cv55F.png)
 
-The goal is to make navigation between many Tmux windows efficient and fast, without having to remember the window number or position in tmux status line.
+The goal is to make navigation between many Tmux windows efficient, without having to remember the window numbers or positions.
 
-### Installation
+### Install
 ``` bash
-    $ echo 'bind-key -n C-` split-window -l 10 ~/path/to/fmux/f.sh' >> ~/.tmux.conf
+    $ ./install.sh 'M-Tab'  # change M-Tab to whatever you prefer
 ```
-And reload your config:
-``` bash
-    $ tmux source-file ~/.tmux.conf
-```
-
-#### Notes:
-* Replace ~/path/to/fmux/f.sh with the actual path to fmux.
-* Replace C-` with anything you prefer. I suggest M-p.
+This adds a line to your `~/.tmux.conf`.
 
 ### Usage
-* __open__: Press C-` (ctrl-backquote or your preferred binding) to start fmux
+* __open__: Press M-Tab (or your preferred binding) to start fmux
 * __search__: Type any part of the window title, e.g. type `pj` to find your `project` window
 * __select__: Press the RETURN key
 * __new window__: ` (two backquotes) to create a new window
@@ -26,7 +19,7 @@ And reload your config:
 * __close__: CTRL-c to close fmux
 * You may run `f.sh` from a normal shell
 
-### Contributions
+### Contribute
 * Feedbacks, bug reports, and patches are highly appreciated
 * Tested with Tmux 1.6+, Bash 4.2.37, GNU Sed 4.2.1, BSD Sed (2005), BSD tr (2004), GNU tr from coreutils 8.17 and GNU Grep 2.5.1 on OSX and Gentoo
 
