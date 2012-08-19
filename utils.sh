@@ -60,13 +60,13 @@ function update {
   fi
 
   if $mode_rename; then
-    prompt="${prompt_color}rename window >>> ${Color_Off}"
+    prompt="${prompt_color}set title >>> ${Color_Off}"
 
   elif $mode_new_win; then
-    prompt="${prompt_color}create window >>> ${Color_Off}"
+    prompt="${prompt_color}new window >>> ${Color_Off}"
 
   else
-    prompt="${prompt_color}search windows >>> ${Color_Off}"
+    prompt="${prompt_color}goto >>> ${Color_Off}"
 
     while read window_line ; do
       window_index=${window_line%:*}
