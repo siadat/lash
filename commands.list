@@ -1,0 +1,3 @@
+vps: ssh my-vps
+servers: start-servers
+fmux-dev: cd fmux

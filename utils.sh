@@ -1,3 +1,5 @@
+#!/usr/bin/env bash -e
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 Blue=`echo -e '\e[0;34m'`
 On_Blue=`echo -e '\e[44m'`
 Yellow=`echo -e '\e[1;32m'`
@@ -6,11 +8,23 @@ Width=`tput co`
 Height=`tput li`
 prompt_color="$Yellow"
 SEARCH_PANES=true
+COMMAND_FILE="$DIR/commands.list"
 PID=$$
+command_buffs=
 
 function read_char {
   read -s -n 1 c
   printf '%d' "'$c'"
+}
+
+function new_window {
+  name="$1"
+  if [ -n "$name" ]; then
+    tmux new-window -n "$name"
+    tmux set-window-option allow-rename off
+  else
+    tmux new-window
+  fi
 }
 
 function init {
@@ -19,6 +33,12 @@ function init {
   tput civis
   matches=
   cursor=0
+}
+
+function ac_lines {
+  query="$1"
+  # given an array of lines, return the ones that match $1
+  echo
 }
 
 function quit {
@@ -53,7 +73,6 @@ function update {
   curr_win=`tmux display-message -p '#S:#I'`
   windows=`tmux list-windows -F '#{window_index}'`
   counter=0
-  win_counter=0
 
   all_windows=$( tmux list-windows -F "#{window_index}:#{window_name}" -t $curr_sess )
   nbr_of_windows=$( echo "$all_windows" |wc -l )
@@ -62,7 +81,28 @@ function update {
     mode_count=1
   fi
 
-  if [ $mode_count = 2 ]; then
+  if [ $mode_count = 3 ]; then
+
+    if [ -z "$command_buffs" ]; then
+      command_buffs=$( cat "$COMMAND_FILE" | grep -v '^$' )
+    fi
+
+    prompt="${prompt_color}commands >>> ${Color_Off}"
+
+    _win_counter=1
+    while read line ; do
+      q=$( prepare_q "$query" )
+      if [ -n "$( echo "$line" | grep "$q" )" ]; then
+        matchness=1000
+        window_address=$_win_counter
+        window_index='+'
+        matches="$matches $matchness|$window_address|dummypane|$_win_counter|$window_index"
+      fi
+      _win_counter=$(( _win_counter + 1 ))
+    done <<< "$matches" < <( echo "$command_buffs" )
+
+
+  elif [ $mode_count = 2 ]; then
     prompt="${prompt_color}set title >>> ${Color_Off}"
 
   elif [ $mode_count = 1 ]; then
@@ -70,6 +110,7 @@ function update {
 
   else
     prompt="${prompt_color}goto >>> ${Color_Off}"
+    win_counter=0
 
     while read window_line ; do
       window_index=${window_line%:*}
@@ -140,12 +181,7 @@ function update {
   fi
 
   if $selected && [ $mode_count = 1 ] ; then
-    if [ -n "$query" ]; then
-      tmux new-window -n "$query"
-      tmux set-window-option allow-rename off
-    else
-      tmux new-window
-    fi
+    new_window "$query"
     quit 0
   elif $selected && [ $mode_count = 2 ] ; then
     if [ -n "$query" ]; then
@@ -169,7 +205,6 @@ function update {
     pane_address=${arr[2]}
     win_counter=${arr[3]}
     window_index=${arr[4]}
-    window_name=${window_names[win_counter]}
 
     if [ "$counter" = "$cursor" ]; then
       caret="> "
@@ -179,34 +214,60 @@ function update {
       color="$Blue"
     fi
 
-    len=$(( ${#buffs[win_counter]} ))
-    snippet_len=$(( $len > 50 ? 50 : $len ))
-    snippet=${buffs[win_counter]:$len - $snippet_len}
+    if [ $mode_count = 0 ]; then
+      window_name=${window_names[win_counter]}
+      len=$(( ${#buffs[win_counter]} ))
+      snippet_len=$(( $len > 50 ? 50 : $len ))
+      snippet=${buffs[win_counter]:$len - $snippet_len}
+    elif [ $mode_count = 3 ]; then
+      line=$( echo "$command_buffs" | sed -n "${win_counter}p" )
+      window_name=${line%:*}
+      snippet=${line#*:}
+      # len=$(( ${#buffs[win_counter]} ))
+      # snippet_len=$(( $len > 50 ? 50 : $len ))
+      # snippet=${buffs[win_counter]:$len - $snippet_len}
+    fi
 
     line=
     line+="${color}"
     q=$( prepare_q "$query" )
     line+=`echo -e "${caret}${window_index}:${window_name}" |sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`
     line+="${Color_Off}"
-    if $SEARCH_PANES; then
-      if [ $matchness = 0 ]; then
-        line+=`echo -e " "`
-      elif [ $matchness -gt 1000 ]; then
-        line+=`echo -e " "`
+
+    if [ $mode_count = 0 ]; then
+
+      if $SEARCH_PANES; then
+        if [ $matchness = 0 ]; then
+          line+=`echo -e " "`
+        elif [ $matchness -gt 1000 ]; then
+          line+=`echo -e " "`
+        else
+          line+=`echo -e " - pane content"`
+        fi
       else
-        line+=`echo -e " - pane content"`
+        line+=`echo -e " "`
       fi
     else
-      line+=`echo -e " "`
+      line+=`echo -e "$snippet" | sed -e "s/\($q\)/$Yellow\1$Color_Off/g" || true`
     fi
-    cho "$line"
 
+    cho "$line"
 
     if $selected; then
       if [ "$counter" = "$cursor" ]; then
-        tmux select-window -t $window_address
-        # tmux select-pane -t $pane_address
-        quit 0
+        if [ $mode_count = 0 ]; then
+          tmux select-window -t $window_address
+          quit 0
+        elif [ $mode_count = 3 ]; then
+          echo $window_address
+          line=$( echo "$command_buffs" | sed -n "${window_address}p" )
+          name=${line%:*}
+          cmd=$( echo ${line#*:} | sed -e 's/^ *//g' || true )
+          new_window "$name"
+          sleep 2
+          tmux send-keys "${cmd}" C-m
+          quit 0
+        fi
       fi
     fi
   done

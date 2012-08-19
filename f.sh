@@ -40,7 +40,7 @@ while true; do
     mode_selected=true
 
   elif [ "$code" = "96" ]; then # backquote
-    mode_count=$(( (mode_count + 1) % 3 ))
+    mode_count=$(( (mode_count + 1) % 4 ))
 
   elif [ "$code" = "27" ]; then # Escape
     code2=`read_char`
