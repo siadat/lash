@@ -38,6 +38,11 @@ function cho {
   echo
 }
 
+function prepare_q {
+  q=$( echo "$1" |sed -e 's/\(.\)/.*\1/g' )
+  echo "${q:2}"
+}
+
 function update {
   matches=
   query=${1,,}
@@ -121,7 +126,7 @@ function update {
           g1=true;
           is_match=true
         else
-          q=$( echo "$query" |sed -e 's/\(.\)/.*\1/g' )
+          q=$( prepare_q "$query" )
           g1=$( echo "$window_name" |grep -oPi "$q" || true )
           if $SEARCH_PANES; then
             g2=$( echo "${buffs[win_counter]}" |grep -oPi "$query" || true )
@@ -189,7 +194,8 @@ function update {
 
     line=
     line+="${color}"
-    line+=`echo -e "${caret}${window_index}:${window_name}" |sed -e "s/\($query\)/$Yellow\1$Color_Off${color}/g" || true`
+    q=$( prepare_q "$query" )
+    line+=`echo -e "${caret}${window_index}:${window_name}" |sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`
     line+="${Color_Off}"
     if $SEARCH_PANES; then
       if [ $matchness -eq 0 ]; then
