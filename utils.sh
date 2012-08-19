@@ -19,11 +19,12 @@ function read_char {
 
 function new_window {
   name="$1"
+  script="$2"
   if [ -n "$name" ]; then
-    tmux new-window -n "$name"
+    tmux new-window -n "$name" "$2"
     tmux set-window-option allow-rename off
   else
-    tmux new-window
+    tmux new-window "$2"
   fi
 }
 
@@ -95,7 +96,7 @@ function update {
       if [ -n "$( echo "$line" | grep "$q" )" ]; then
         matchness=1000
         window_address=$_win_counter
-        window_index='+'
+        window_index=' '
         matches="$matches $matchness|$window_address|dummypane|$_win_counter|$window_index"
       fi
       _win_counter=$(( _win_counter + 1 ))
@@ -205,9 +206,12 @@ function update {
     pane_address=${arr[2]}
     win_counter=${arr[3]}
     window_index=${arr[4]}
+    if [ -n "$window_index" ]; then
+      window_index="${window_index}:"
+    fi
 
     if [ "$counter" = "$cursor" ]; then
-      caret="> "
+      caret="- "
       color="$On_Blue"
     else
       caret="  "
@@ -220,9 +224,9 @@ function update {
       snippet_len=$(( $len > 50 ? 50 : $len ))
       snippet=${buffs[win_counter]:$len - $snippet_len}
     elif [ $mode_count = 3 ]; then
-      line=$( echo "$command_buffs" | sed -n "${win_counter}p" )
+      line=$( echo "$command_buffs" | sed -n "${win_counter}p" | sed -e 's/^ *//g' )
       window_name=${line%:*}
-      snippet=${line#*:}
+      snippet=" \$${line#*:}"
       # len=$(( ${#buffs[win_counter]} ))
       # snippet_len=$(( $len > 50 ? 50 : $len ))
       # snippet=${buffs[win_counter]:$len - $snippet_len}
@@ -231,7 +235,7 @@ function update {
     line=
     line+="${color}"
     q=$( prepare_q "$query" )
-    line+=`echo -e "${caret}${window_index}:${window_name}" |sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`
+    line+=`echo -e "${caret}${window_index}${window_name}" |sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`
     line+="${Color_Off}"
 
     if [ $mode_count = 0 ]; then
@@ -248,7 +252,7 @@ function update {
         line+=`echo -e " "`
       fi
     else
-      line+=`echo -e "$snippet" | sed -e "s/\($q\)/$Yellow\1$Color_Off/g" || true`
+      line+=`echo -e "$snippet" | sed -e "s/\($q\)/$Yellow\1$Color_Off/g"`
     fi
 
     cho "$line"
@@ -263,9 +267,9 @@ function update {
           line=$( echo "$command_buffs" | sed -n "${window_address}p" )
           name=${line%:*}
           cmd=$( echo ${line#*:} | sed -e 's/^ *//g' || true )
-          new_window "$name"
-          sleep 2
-          tmux send-keys "${cmd}" C-m
+          new_window "$name" "$cmd"
+          #sleep 2
+          #tmux send-keys "${cmd}" C-m
           quit 0
         fi
       fi
