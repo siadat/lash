@@ -15,16 +15,16 @@ fi
 
 init
 
-mode_rename=false
-mode_new_win=false
 mode_selected=false
+mode_commands=false
 redraw=false
+mode_count=0
 
 while true; do
 
-  if $redraw || $mode_new_win || $mode_rename || $mode_selected || [ "$saved_query" != "$query" -o "$saved_cursor" != "$cursor" ]; then
+  if $redraw || $mode_counter > 0 || $mode_selected || [ "$saved_query" != "$query" -o "$saved_cursor" != "$cursor" ]; then
     tput cup 0 0
-    update "$query" $mode_selected $mode_rename $mode_new_win
+    update "$query" $mode_selected $mode_count
     saved_query="$query"
     saved_cursor="$cursor"
   fi
@@ -40,17 +40,7 @@ while true; do
     mode_selected=true
 
   elif [ "$code" = "96" ]; then # backquote
-    if $mode_new_win; then
-      if $mode_rename; then
-        mode_new_win=false
-        mode_rename=false
-        redraw=true
-      else
-        mode_rename=true
-      fi
-    else
-      mode_new_win=true
-    fi
+    mode_count=$(( (mode_count + 1) % 3 ))
 
   elif [ "$code" = "27" ]; then # Escape
     code2=`read_char`

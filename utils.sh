@@ -47,8 +47,7 @@ function update {
   matches=
   query=${1,,}
   selected=$2
-  mode_rename=$3
-  mode_new_win=$4
+  mode_count=$3
   curr_sess=`tmux display-message -p '#S'`
   curr_pane=`tmux display-message -p '#S:#I.#P'`
   curr_win=`tmux display-message -p '#S:#I'`
@@ -59,15 +58,14 @@ function update {
   all_windows=$( tmux list-windows -F "#{window_index}:#{window_name}" -t $curr_sess )
   nbr_of_windows=$( echo "$all_windows" |wc -l )
 
-  if [ $(( $nbr_of_windows )) = 1 ]; then
-    echo "$nbr_of_windows"
-    quit 0
+  if [ $nbr_of_windows = 1 -a $mode_count = 0 ]; then
+    mode_count=1
   fi
 
-  if $mode_rename; then
+  if [ $mode_count = 2 ]; then
     prompt="${prompt_color}set title >>> ${Color_Off}"
 
-  elif $mode_new_win; then
+  elif [ $mode_count = 1 ]; then
     prompt="${prompt_color}new window >>> ${Color_Off}"
 
   else
@@ -84,13 +82,6 @@ function update {
           window_names[$win_counter]="${window_name}"
         fi
 
-        if [ $(( $nbr_of_windows )) = 2 ]; then
-          tmux select-window -t $window_address
-          tmux select-pane -t $pane_address
-          quit 0
-        fi
-
-        #echo "`tmux list-panes -F "#{pane_index}" -t $curr_sess:$window_index`"
         pane_counter=0
         if [ -z "${buffs[win_counter]}" ]; then
           for pane_index in `tmux list-panes -F "#{pane_index}" -t $curr_sess:$window_index`; do
@@ -148,7 +139,7 @@ function update {
     done <<< "$matches" < <( echo "$all_windows" )
   fi
 
-  if $selected && $mode_new_win; then
+  if $selected && [ $mode_count = 1 ] ; then
     if [ -n "$query" ]; then
       tmux new-window -n "$query"
       tmux set-window-option allow-rename off
@@ -156,7 +147,7 @@ function update {
       tmux new-window
     fi
     quit 0
-  elif $selected && $mode_rename; then
+  elif $selected && [ $mode_count = 2 ] ; then
     if [ -n "$query" ]; then
       tmux set-window-option -t $curr_win allow-rename off
       tmux rename-window -t $curr_win "$query"
@@ -198,7 +189,7 @@ function update {
     line+=`echo -e "${caret}${window_index}:${window_name}" |sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`
     line+="${Color_Off}"
     if $SEARCH_PANES; then
-      if [ $matchness -eq 0 ]; then
+      if [ $matchness = 0 ]; then
         line+=`echo -e " "`
       elif [ $matchness -gt 1000 ]; then
         line+=`echo -e " "`
