@@ -2,12 +2,20 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+if [ -e "$DIR/wm/tmux.sh" ]; then
+  source "$DIR/wm/tmux.sh"
+else
+  read -p "Could not find $DIR/wm/tmux.sh"
+  exit 1
+fi
+
 if [ -e "$DIR/utils.sh" ]; then
   source "$DIR/utils.sh"
 else
   read -p "Could not find $DIR/utils.sh"
   exit 1
 fi
+
 
 if [ $(( $( ps | grep -wv $PID | grep "$0" | wc -l ) )) -gt 2 ]; then
   exit 1

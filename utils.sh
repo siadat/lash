@@ -18,17 +18,6 @@ function read_char {
   printf '%d' "'$c'"
 }
 
-function new_window {
-  name="$1"
-  script="$2"
-  if [ -n "$name" ]; then
-    tmux new-window -n "$name" "$2"
-    tmux set-window-option allow-rename off
-  else
-    tmux new-window "$2"
-  fi
-}
-
 function init {
   stty -echo
   tput clear
@@ -70,13 +59,11 @@ function update {
   query=${1,,}
   selected=$2
   mode_count=$3
-  curr_sess=`tmux display-message -p '#S'`
-  curr_pane=`tmux display-message -p '#S:#I.#P'`
-  curr_win=`tmux display-message -p '#S:#I'`
-  windows=`tmux list-windows -F '#{window_index}'`
+  curr_sess=`wm_current_session_address`
+  curr_win=`wm_current_window_address`
   counter=0
 
-  all_windows=$( tmux list-windows -F "#{window_index}:#{window_name}" -t $curr_sess )
+  all_windows=$( wm_list_windows $curr_sess )
   nbr_of_windows=$( echo "$all_windows" |wc -l )
 
   if [ $nbr_of_windows = 1 -a $mode_count = 0 ]; then
@@ -138,13 +125,12 @@ function update {
 
         pane_counter=0
         if [ -z "${buffs[win_counter]}" ]; then
-          for pane_index in `tmux list-panes -F "#{pane_index}" -t $curr_sess:$window_index`; do
+          for line in `wm_list_panes $curr_sess:$window_index`; do
+            pane_index=${line%:*}
             pane_address=$window_address.$pane_index
 
             if $SEARCH_PANES; then
-              tmux clear-history -t $pane_address
-              tmux capture-pane -t $pane_address
-              buff="`tmux show-buffer -b 0`"
+              buff="`wm_pane_content $pane_address`"
             else
               buff=
             fi
@@ -194,15 +180,10 @@ function update {
   fi
 
   if $selected && [ $mode_count = 1 ] ; then
-    new_window "$query"
+    wm_new_window "$query"
     quit 0
   elif $selected && [ $mode_count = 2 ] ; then
-    if [ -n "$query" ]; then
-      tmux set-window-option -t $curr_win allow-rename off
-      tmux rename-window -t $curr_win "$query"
-    else
-      tmux set-window-option -t $curr_win allow-rename on
-    fi
+    wm_rename_window "$curr_win" "$query"
     quit 0
   fi
 
@@ -213,7 +194,6 @@ function update {
   if [ -n "$query" ] ; then
     readarray -t sorted < <(for a in $matches; do echo "$a"; done | sort -rn )
   else
-    # assumes that list-windows is ordered by last focus
     readarray -t sorted < <(for a in $matches; do echo "$a"; done )
   fi
 
@@ -279,16 +259,15 @@ function update {
     if $selected; then
       if [ "$counter" = "$cursor" ]; then
         if [ $mode_count = 0 ]; then
-          tmux select-window -t $window_address
+          wm_select_window $window_address
           quit 0
         elif [ $mode_count = 3 ]; then
           echo $window_address
           line=$( echo "$command_buffs" | sed -n "${window_address}p" )
           name=${line%:*}
           cmd=$( echo ${line#*:} | sed -e 's/^ *//g' || true )
-          new_window "$name" "$cmd"
+          wm_new_window "$name" "$cmd"
           #sleep 2
-          #tmux send-keys "${cmd}" C-m
           quit 0
         fi
       fi
