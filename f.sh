@@ -1,4 +1,5 @@
 #!/usr/bin/env bash -e
+Height=`tput li`
 
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LIB="${ROOT}/lib"
@@ -33,7 +34,6 @@ fi
 init
 
 mode_selected=false
-mode_commands=false
 redraw=false
 mode_count=0
 
@@ -70,7 +70,8 @@ while true; do
 
     if [ "$code $code2 $code3" = "27 91 66" ]; then # Down
       nbr_of_matches=`echo "$matches" |wc -w`
-      cursor=$(( cursor < nbr_of_matches - 1 ? cursor + 1 : nbr_of_matches - 1 ))
+      cursor=$(( cursor + 2 > nbr_of_matches ? nbr_of_matches - 1 : cursor + 1 ))
+      cursor=$(( cursor + 3 > Height ? Height - 3 : cursor ))
 
     elif [ "$code $code2 $code3" = "27 91 65" ]; then # Up
       cursor=$(( cursor > 0 ? cursor - 1 : 0 ))

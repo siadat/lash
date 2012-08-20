@@ -16,8 +16,8 @@ A __window__ and __pane__ finder for complex Tmux sessions, inspired by [ctrlp](
 * __search__: Type any part of the window title, e.g. type `pj` to find your `project` window
 * __select__: Press the RETURN key
 * __new window__: Press Tab to create a new window
-* __rename window__: Press Tab-Tab to rename current window
-* __command mode__: Press Tab-Tab-Tab to go to command mode
+* __command mode__: Press Tab-Tab to go to command mode
+* __rename window__: Press Tab-Tab-Tab to rename current window
 * __close__: CTRL-c to close fmux
 * You may run `f.sh` from a normal shell
 

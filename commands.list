@@ -1,3 +1,12 @@
-vps: ssh my-vps
-servers: start-servers
-fmux-dev: cd fmux
+# Add more commands here.
+#
+# Examples:
+#
+# vps: ssh my-vps -v
+# push project A: cd ~/project-a/ && git push -u origin master && read
+# project A dev: cd ~/project-a/ && vim
+# project B dev: cd ~/project-b/ && vim
+# programming: cd ~/programming/ && zsh
+
+ping: ping 4.2.2.4
+cal: cal 2012 && read

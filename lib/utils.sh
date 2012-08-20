@@ -98,7 +98,7 @@ function tick {
 
   if $same; then
     true
-  elif [ $mode_count = 3 ]; then
+  elif [ $mode_count = 1 ]; then
 
     i=1
     while read line; do
@@ -112,7 +112,7 @@ function tick {
     #  command_buffs=$( cat "$COMMAND_FILE" | grep -v '\s*#' | sed -e 's/^ *//g' | grep -v '^$' || true )
     #fi
 
-    prompt="${prompt_color}commands >>> ${Color_Off}"
+    prompt="${prompt_color}run >>> ${Color_Off}"
 
     _win_counter=1
     for line in "${command_buffs[@]}"; do
@@ -138,14 +138,14 @@ function tick {
       _win_counter=$(( _win_counter + 1 ))
     done <<< "$matches"
 
-  elif [ $mode_count = 2 ]; then
-    prompt="${prompt_color}set title >>> ${Color_Off}"
+  elif [ $mode_count = 3 ]; then
+    prompt="${prompt_color}rename this window >>> ${Color_Off}"
 
-  elif [ $mode_count = 1 ]; then
+  elif [ $mode_count = 2 ]; then
     prompt="${prompt_color}new window >>> ${Color_Off}"
 
   else
-    prompt="${prompt_color}goto >>> ${Color_Off}"
+    prompt="${prompt_color}find >>> ${Color_Off}"
     win_counter=0
 
     while read window_line ; do
@@ -215,10 +215,10 @@ function tick {
     done <<< "$matches" < <( echo "$all_windows" )
   fi
 
-  if $selected && [ $mode_count = 1 ] ; then
+  if $selected && [ $mode_count = 2 ] ; then
     wm_new_window "$query"
     quit 0
-  elif $selected && [ $mode_count = 2 ] ; then
+  elif $selected && [ $mode_count = 3 ] ; then
     wm_rename_window "$curr_win" "$query"
     quit 0
   fi
@@ -260,7 +260,7 @@ function tick {
       len=$(( ${#buffs[win_counter]} ))
       snippet_len=$(( $len > 50 ? 50 : $len ))
       snippet=${buffs[win_counter]:$len - $snippet_len}
-    elif [ $mode_count = 3 ]; then
+    elif [ $mode_count = 1 ]; then
       line="${command_buffs[win_counter]}"
       window_name=${line%:*}
       snippet=" \$${line#*:}"
@@ -307,7 +307,7 @@ function tick {
         if [ $mode_count = 0 ]; then
           wm_select_window $window_address
           quit 0
-        elif [ $mode_count = 3 ]; then
+        elif [ $mode_count = 1 ]; then
           line="${command_buffs[win_counter]}"
           name=${line%:*}
           cmd=$( echo ${line#*:} | sed -e 's/^ *//g' || true )
