@@ -1,25 +1,26 @@
 #!/usr/bin/env bash -e
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LIB="${ROOT}/lib"
 
-if [ -e "$DIR/colors.sh" ]; then
-  source "$DIR/colors.sh"
+if [ -e "$LIB/colors.sh" ]; then
+  source "$LIB/colors.sh"
 else
-  read -p "Could not find $DIR/colors.sh"
+  read -p "Could not find $LIB/colors.sh"
   exit 1
 fi
 
-if [ -e "$DIR/wm/tmux.sh" ]; then
-  source "$DIR/wm/tmux.sh"
+if [ -e "$LIB/wm/tmux.sh" ]; then
+  source "$LIB/wm/tmux.sh"
 else
-  read -p "Could not find $DIR/wm/tmux.sh"
+  read -p "Could not find $LIB/wm/tmux.sh"
   exit 1
 fi
 
-if [ -e "$DIR/utils.sh" ]; then
-  source "$DIR/utils.sh"
+if [ -e "$LIB/utils.sh" ]; then
+  source "$LIB/utils.sh"
 else
-  read -p "Could not find $DIR/utils.sh"
+  read -p "Could not find $LIB/utils.sh"
   exit 1
 fi
 

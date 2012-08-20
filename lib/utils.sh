@@ -1,10 +1,10 @@
 #!/usr/bin/env bash -e
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 Width=`tput co`
 Height=`tput li`
 prompt_color="$Yellow"
 SEARCH_PANES=true
-COMMAND_FILE="$DIR/commands.list"
+COMMAND_FILE="$ROOT/commands.list"
 PID=$$
 command_buffs=
 debug=false
