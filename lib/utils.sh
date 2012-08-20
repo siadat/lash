@@ -112,7 +112,7 @@ function tick {
     #  command_buffs=$( cat "$COMMAND_FILE" | grep -v '\s*#' | sed -e 's/^ *//g' | grep -v '^$' || true )
     #fi
 
-    prompt="${prompt_color}run >>> ${Color_Off}"
+    prompt="${prompt_color}run command >>> ${Color_Off}"
 
     _win_counter=1
     for line in "${command_buffs[@]}"; do

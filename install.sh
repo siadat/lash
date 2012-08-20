@@ -15,7 +15,11 @@ else
 fi
 
 if [ "$wm" = "tmux" ]; then
+  echo "# Finder:"
   echo "bind-key -n $binding split-window -l 10 '$dir/f.sh ${wm}'" >> ~/.tmux.conf
+  echo "set-option -g window-status-format ''" >> ~/.tmux.conf
+  echo "set-option -g window-status-current-format ''" >> ~/.tmux.conf
+  echo
   tmux source-file ~/.tmux.conf
 else
   echo "Only tmux is supported at the moment."
@@ -23,4 +27,3 @@ else
   echo "need to create a file like ./lib/tmux.sh for your window manager."
   echo "Send me a pull request and I will merge it upstream. Thank you!"
 fi
-

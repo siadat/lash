@@ -6,8 +6,8 @@ A __window__ and __pane__ finder for complex Tmux sessions, inspired by [ctrlp](
 ``` bash
     $ ./install.sh tmux M-Tab
 ```
-* Change M-Tab to whatever key binding you prefer.
-* The install script adds a line to your `~/.tmux.conf`.
+* Change M-Tab to whatever key binding you prefer
+* The install script adds a few lines to your `~/.tmux.conf`
 * __Enable Meta key in OSX Terminal__: `Preferences > Settings > Keyboard > Use option as meta key`
 * __Enable Meta key in iTerm__: `Preferences > Profiles > Your profile > Left Keys > Left option key acts as __+Esc__`
 
@@ -19,7 +19,6 @@ A __window__ and __pane__ finder for complex Tmux sessions, inspired by [ctrlp](
 * __command mode__: Press Tab-Tab to go to command mode
 * __rename window__: Press Tab-Tab-Tab to rename current window
 * __close__: CTRL-c to close fmux
-* You may run `f.sh` from a normal shell
 
 ### Contribute
 * Feedbacks, bug reports, and patches are highly appreciated
