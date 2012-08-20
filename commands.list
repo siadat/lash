@@ -9,4 +9,4 @@
 # programming: cd ~/programming/ && zsh
 
 ping: ping 4.2.2.4
-cal: cal 2012 && read
+show calendar: cal 2012 && read
