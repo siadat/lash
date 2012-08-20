@@ -8,12 +8,8 @@ A __window__ and __pane__ finder for complex Tmux sessions, inspired by [ctrlp](
 ```
 * Change M-Tab to whatever key binding you prefer.
 * The install script adds a line to your `~/.tmux.conf`.
-
-#### Enable Meta key in OSX Terminal
-`Preferences > Settings > Keyboard > Use option as meta key`
-
-#### Enable Meta key in iTerm
-`Preferences > Profiles > Your profile > Left Keys > Left option key acts as __+Esc__`
+* __Enable Meta key in OSX Terminal__: `Preferences > Settings > Keyboard > Use option as meta key`
+* __Enable Meta key in iTerm__: `Preferences > Profiles > Your profile > Left Keys > Left option key acts as __+Esc__`
 
 ### Usage
 * __open__: Press M-Tab (or your preferred binding) to start fmux
