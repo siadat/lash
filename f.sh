@@ -7,21 +7,21 @@ WM=$1
 if [ -e "$LIB/colors.sh" ]; then
   source "$LIB/colors.sh"
 else
-  read -p "Could not find $LIB/colors.sh"
+  read -p "> Could not find $LIB/colors.sh"
   exit 1
 fi
 
 if [ -e "$LIB/wm/$WM.sh" ]; then
   source "$LIB/wm/$WM.sh"
 else
-  read -p "Could not find $LIB/wm/$WM.sh"
+  read -p "> Could not find $LIB/wm/$WM.sh"
   exit 1
 fi
 
 if [ -e "$LIB/utils.sh" ]; then
   source "$LIB/utils.sh"
 else
-  read -p "Could not find $LIB/utils.sh"
+  read -p "> Could not find $LIB/utils.sh"
   exit 1
 fi
 

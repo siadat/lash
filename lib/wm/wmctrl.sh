@@ -1,5 +1,5 @@
-# This file is an incomplete and not tested.
-# Any improvements is welcomed.
+# This file is incomplete and not tested.
+# Any improvements are welcomed.
 
 # Create a new window
 #
