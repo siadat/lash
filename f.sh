@@ -58,6 +58,10 @@ while true; do
     elif [ "$code $code2 $code3" = "27 91 65" ]; then # Up
       cursor=$(( cursor > 0 ? cursor - 1 : 0 ))
 
+    elif [ "$code $code2 $code3" = "27 91 90" ]; then # Shift-Tab
+      mode_count=$(( (mode_count - 1) % 4 ))
+      mode_count=$(( (mode_count < 0) ? (4 + mode_count) : mode_count ))
+
     else
       quit 0
 
