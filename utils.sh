@@ -1,9 +1,5 @@
 #!/usr/bin/env bash -e
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-Blue=`echo -e '\e[0;34m'`
-On_Blue=`echo -e '\e[44m'`
-Yellow=`echo -e '\e[1;32m'`
-Color_Off=`echo -e '\e[0m'`
 Width=`tput co`
 Height=`tput li`
 prompt_color="$Yellow"
@@ -73,7 +69,7 @@ function update {
   if [ $mode_count = 3 ]; then
 
     if [ -z "$command_buffs" ]; then
-      command_buffs=$( cat "$COMMAND_FILE" | sed -e 's/^ *//g' | grep -v '^$' || true )
+      command_buffs=$( cat "$COMMAND_FILE" | grep -v '\s*#' | sed -e 's/^ *//g' | grep -v '^$' || true )
     fi
 
     prompt="${prompt_color}commands >>> ${Color_Off}"

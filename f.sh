@@ -2,6 +2,13 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+if [ -e "$DIR/colors.sh" ]; then
+  source "$DIR/colors.sh"
+else
+  read -p "Could not find $DIR/colors.sh"
+  exit 1
+fi
+
 if [ -e "$DIR/wm/tmux.sh" ]; then
   source "$DIR/wm/tmux.sh"
 else
