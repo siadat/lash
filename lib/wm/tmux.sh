@@ -8,10 +8,10 @@ function wm_new_window {
   script=$2
 
   if [ -n "$name" ]; then
-    tmux new-window -n "$name" "$2"
+    tmux new-window -n "$name" "$script"
     tmux set-window-option allow-rename off
   else
-    tmux new-window "$2"
+    tmux new-window "$script"
   fi
 
 }

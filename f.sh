@@ -2,6 +2,7 @@
 
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LIB="${ROOT}/lib"
+WM=$1
 
 if [ -e "$LIB/colors.sh" ]; then
   source "$LIB/colors.sh"
@@ -10,10 +11,10 @@ else
   exit 1
 fi
 
-if [ -e "$LIB/wm/tmux.sh" ]; then
-  source "$LIB/wm/tmux.sh"
+if [ -e "$LIB/wm/$WM.sh" ]; then
+  source "$LIB/wm/$WM.sh"
 else
-  read -p "Could not find $LIB/wm/tmux.sh"
+  read -p "Could not find $LIB/wm/$WM.sh"
   exit 1
 fi
 
