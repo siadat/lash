@@ -11,6 +11,7 @@ SEARCH_PANES=true
 COMMAND_FILE="$DIR/commands.list"
 PID=$$
 command_buffs=
+debug=false
 
 function read_char {
   read -s -n 1 c
@@ -85,7 +86,7 @@ function update {
   if [ $mode_count = 3 ]; then
 
     if [ -z "$command_buffs" ]; then
-      command_buffs=$( cat "$COMMAND_FILE" | grep -v '^$' )
+      command_buffs=$( cat "$COMMAND_FILE" | sed -e 's/^ *//g' | grep -v '^$' || true )
     fi
 
     prompt="${prompt_color}commands >>> ${Color_Off}"
@@ -93,8 +94,19 @@ function update {
     _win_counter=1
     while read line ; do
       q=$( prepare_q "$query" )
-      if [ -n "$( echo "$line" | grep "$q" )" ]; then
-        matchness=1000
+      name=${line%:*}
+      cmd=${line#*:}
+      matchness=0
+
+      if [[ $name =~ $q ]]; then
+        matchness=$(( matchness + 1000 ))
+      fi
+
+      if [[ $cmd =~ $q ]]; then
+        matchness=$(( matchness + 1 ))
+      fi
+
+      if [ $matchness -gt 0 -o "$q" = "" ]; then
         window_address=$_win_counter
         window_index=' '
         matches="$matches $matchness|$window_address|dummypane|$_win_counter|$window_index"
@@ -224,7 +236,7 @@ function update {
       snippet_len=$(( $len > 50 ? 50 : $len ))
       snippet=${buffs[win_counter]:$len - $snippet_len}
     elif [ $mode_count = 3 ]; then
-      line=$( echo "$command_buffs" | sed -n "${win_counter}p" | sed -e 's/^ *//g' )
+      line=$( echo "$command_buffs" | sed -n "${win_counter}p" )
       window_name=${line%:*}
       snippet=" \$${line#*:}"
       # len=$(( ${#buffs[win_counter]} ))
@@ -235,7 +247,8 @@ function update {
     line=
     line+="${color}"
     q=$( prepare_q "$query" )
-    line+=`echo -e "${caret}${window_index}${window_name}" |sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`
+    $debug && debug_msg=" (debug: ${matchness}) "
+    line+=`echo -e "${caret}${debug_msg}${window_index}${window_name}" |sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`
     line+="${Color_Off}"
 
     if [ $mode_count = 0 ]; then
