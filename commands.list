@@ -10,3 +10,5 @@
 
 ping: ping 4.2.2.4
 show calendar: cal 2012 && read
+programming: cd ~/programming/ && zsh -i
+tmux rc: vim ~/.tmux.conf && tmux source-file ~/.tmux.conf

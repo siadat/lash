@@ -4,7 +4,7 @@ A __window__ and __pane__ finder for complex Tmux sessions, inspired by [ctrlp](
 
 ### Install
 ``` bash
-    $ ./install.sh tmux M-Tab
+$ ./install.sh tmux M-Tab
 ```
 * Change M-Tab to whatever key binding you prefer
 * The install script adds a few lines to your `~/.tmux.conf`
