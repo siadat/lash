@@ -210,7 +210,13 @@ function update {
 
   cho "$line"
 
-  readarray -t sorted < <(for a in $matches; do echo "$a"; done | sort -rn)
+  if [ -n "$query" ] ; then
+    readarray -t sorted < <(for a in $matches; do echo "$a"; done | sort -rn )
+  else
+    # assumes that list-windows is ordered by last focus
+    readarray -t sorted < <(for a in $matches; do echo "$a"; done )
+  fi
+
   for counter in "${!sorted[@]}"; do
     IFS='|' read -a arr <<< "${sorted[counter]}"
     matchness=${arr[0]}
