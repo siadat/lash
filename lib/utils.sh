@@ -6,8 +6,20 @@ prompt_color="$Yellow"
 SEARCH_PANES=true
 COMMAND_FILE="$ROOT/commands.list"
 PID=$$
-command_buffs=
+declare -a command_buffs
 debug=false
+line_counter=0
+saved_query=
+saved_mode=
+same=
+COLOR=1
+#declare -A escaped_queries
+#if [ -n "${escaped_queries["q$query"]}" ]; then
+#  q="${escaped_queries["q$query"]}"
+#else
+#  q=$( prepare_q "$query" )
+#  escaped_queries["q$query"]="${q}"
+#fi
 
 function read_char {
   read -s -n 1 c
@@ -20,6 +32,10 @@ function init {
   tput civis
   matches=
   cursor=0
+}
+
+function clear_end_of_screen {
+  tput cd || tput ed || true
 }
 
 function ac_lines {
@@ -39,10 +55,13 @@ function oops {
   quit 1
 }
 
-function cho {
-  echo -en "$1"
-  tput el
-  echo
+function lecho {
+  if [ $line_counter -lt $(( Height - 1 )) ]; then
+    echo -en "$1"
+    tput el
+    echo
+  fi
+  line_counter=$(( line_counter + 1 ))
 }
 
 function prepare_q {
@@ -50,14 +69,25 @@ function prepare_q {
   echo "${q:2}"
 }
 
-function update {
-  matches=
+function tick {
   query=${1,,}
   selected=$2
   mode_count=$3
   curr_sess=`wm_current_session_address`
   curr_win=`wm_current_window_address`
   counter=0
+
+  if [ -z "$same" ]; then
+    same=false
+    matches=
+  elif [ "$saved_query" = "$query" ] && [ "$saved_mode" = "$mode_count" ] ; then
+    same=true
+  else
+    matches=
+    same=false
+  fi
+  saved_query="$query"
+  saved_mode="$mode_count"
 
   all_windows=$( wm_list_windows $curr_sess )
   nbr_of_windows=$( echo "$all_windows" |wc -l )
@@ -66,16 +96,27 @@ function update {
     mode_count=1
   fi
 
-  if [ $mode_count = 3 ]; then
+  if $same; then
+    true
+  elif [ $mode_count = 3 ]; then
 
-    if [ -z "$command_buffs" ]; then
-      command_buffs=$( cat "$COMMAND_FILE" | grep -v '\s*#' | sed -e 's/^ *//g' | grep -v '^$' || true )
-    fi
+    i=1
+    while read line; do
+      if [ -n "$( echo "$line" | sed -e 's/\s*#.*//g' | sed -e 's/^ *//g' )" ]; then
+        command_buffs[$i]="$line"
+        i=$(( i + 1 ))
+      fi
+    done < "$COMMAND_FILE"
+
+    #if [ -z "$command_buffs" ]; then
+    #  command_buffs=$( cat "$COMMAND_FILE" | grep -v '\s*#' | sed -e 's/^ *//g' | grep -v '^$' || true )
+    #fi
 
     prompt="${prompt_color}commands >>> ${Color_Off}"
 
     _win_counter=1
-    while read line ; do
+    for line in "${command_buffs[@]}"; do
+    # while read line ; do
       q=$( prepare_q "$query" )
       name=${line%:*}
       cmd=${line#*:}
@@ -95,8 +136,7 @@ function update {
         matches="$matches $matchness|$window_address|dummypane|$_win_counter|$window_index"
       fi
       _win_counter=$(( _win_counter + 1 ))
-    done <<< "$matches" < <( echo "$command_buffs" )
-
+    done <<< "$matches"
 
   elif [ $mode_count = 2 ]; then
     prompt="${prompt_color}set title >>> ${Color_Off}"
@@ -185,7 +225,7 @@ function update {
 
   line="${prompt}${query}_"
 
-  cho "$line"
+  lecho "$line"
 
   if [ -n "$query" ] ; then
     readarray -t sorted < <(for a in $matches; do echo "$a"; done | sort -rn )
@@ -194,6 +234,9 @@ function update {
   fi
 
   for counter in "${!sorted[@]}"; do
+    if [ $counter -gt $(( Height - 3 )) ] ; then
+      continue
+    fi
     IFS='|' read -a arr <<< "${sorted[counter]}"
     matchness=${arr[0]}
     window_address=${arr[1]}
@@ -218,7 +261,7 @@ function update {
       snippet_len=$(( $len > 50 ? 50 : $len ))
       snippet=${buffs[win_counter]:$len - $snippet_len}
     elif [ $mode_count = 3 ]; then
-      line=$( echo "$command_buffs" | sed -n "${win_counter}p" )
+      line="${command_buffs[win_counter]}"
       window_name=${line%:*}
       snippet=" \$${line#*:}"
       # len=$(( ${#buffs[win_counter]} ))
@@ -226,12 +269,15 @@ function update {
       # snippet=${buffs[win_counter]:$len - $snippet_len}
     fi
 
-    line=
-    line+="${color}"
-    q=$( prepare_q "$query" )
     $debug && debug_msg=" (debug: ${matchness}) "
-    line+=`echo -e "${caret}${debug_msg}${window_index}${window_name}" |sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`
-    line+="${Color_Off}"
+    if [[ $COLOR = 2 ]]; then
+      q=$( prepare_q "$query" )
+      line="${color}${caret}"`echo -e "${debug_msg}${window_index}${window_name}" | sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`"${Color_Off}"
+    elif [[ $COLOR = 1 ]]; then
+      line="${color}${caret}${debug_msg}${window_index}${window_name}${Color_Off}"
+    else
+      line="${caret}${debug_msg}${window_index}${window_name}"
+    fi
 
     if [ $mode_count = 0 ]; then
 
@@ -247,10 +293,14 @@ function update {
         line+=`echo -e " "`
       fi
     else
-      line+=`echo -e "$snippet" | sed -e "s/\($q\)/$Yellow\1$Color_Off/g"`
+      if [[ $COLOR = 2 ]]; then
+        line+=`echo -e "$snippet" | sed -e "s/\($q\)/$Yellow\1$Color_Off/g"`
+      else
+        line+="$snippet"
+      fi
     fi
 
-    cho "$line"
+    lecho "$line"
 
     if $selected; then
       if [ "$counter" = "$cursor" ]; then
@@ -258,16 +308,15 @@ function update {
           wm_select_window $window_address
           quit 0
         elif [ $mode_count = 3 ]; then
-          echo $window_address
-          line=$( echo "$command_buffs" | sed -n "${window_address}p" )
+          line="${command_buffs[win_counter]}"
           name=${line%:*}
           cmd=$( echo ${line#*:} | sed -e 's/^ *//g' || true )
           wm_new_window "$name" "$cmd"
-          #sleep 2
           quit 0
         fi
       fi
     fi
   done
-  tput cd || tput ed || true
+  line_counter=0
+  clear_end_of_screen
 }

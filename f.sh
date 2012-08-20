@@ -41,7 +41,7 @@ while true; do
 
   if $redraw || $mode_counter > 0 || $mode_selected || [ "$saved_query" != "$query" -o "$saved_cursor" != "$cursor" ]; then
     tput cup 0 0
-    update "$query" $mode_selected $mode_count
+    tick "$query" $mode_selected $mode_count
     saved_query="$query"
     saved_cursor="$cursor"
   fi
