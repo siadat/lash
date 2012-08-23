@@ -127,6 +127,7 @@ function tick {
   fi
 
   if ! $same && [ $curr_mode = 0 ]; then
+    q=$( prepare_q "$query" )
     prompt="${prompt_color}find >>> ${Color_Off}"
     win_counter=0
 
@@ -175,7 +176,6 @@ function tick {
           g1=true;
           is_match=true
         else
-          q=$( prepare_q "$query" )
           g1=$( echo "$window_name" |grep -oPi "$q" || true )
           if $SEARCH_PANES; then
             g2=$( echo "${buffs[win_counter]}" |grep -oPi "$query" || true )
@@ -190,7 +190,7 @@ function tick {
         fi
 
         if $is_match; then
-          matches="$matches $matchness|$window_address|dummypane|$win_counter|$window_index"
+          matches="$matches $matchness|$window_address|dummypane|$win_counter|"
         fi
         win_counter=$(( win_counter + 1 ))
       fi
@@ -217,14 +217,13 @@ function tick {
 
     prompt="${prompt_color}run command >>> ${Color_Off}"
 
+    q=$( prepare_q "$query" )
     for _win_counter in "${!command_buffs[@]}"; do
       line=${command_buffs[_win_counter]}
-      q=$( prepare_q "$query" )
       name=${line%:*}
       cmd=${line#*:}
       matchness=0
 
-      q=$( prepare_q "$query" )
       g1=$( echo "$name" |grep -oPi "$q" || true )
       if [[ $cmd =~ $q ]]; then g2="m"; else g2=""; fi
 
@@ -232,7 +231,7 @@ function tick {
 
       if [ $matchness -gt 0 -o "$q" = "" ]; then
         window_address=$_win_counter
-        window_index=' '
+        window_index='+'
         matches="$matches $matchness|$window_address|dummypane|$_win_counter|$window_index"
       fi
     done <<< "$matches"
@@ -269,14 +268,11 @@ function tick {
       continue
     fi
     IFS='|' read -a arr <<< "${sorted[counter]}"
-    matchness=${arr[0]}
-    window_address=${arr[1]}
-    pane_address=${arr[2]}
-    win_counter=${arr[3]}
-    window_index=${arr[4]}
-    if [ -n "$window_index" ]; then
-      window_index="${window_index}:"
-    fi
+    matchness="${arr[0]}"
+    window_address="${arr[1]}"
+    pane_address="${arr[2]}"
+    win_counter="${arr[3]}"
+    window_index="${arr[4]}"
 
     if [ "$counter" = "$cursor" ]; then
       caret="- "
