@@ -3,7 +3,7 @@ ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 debug=false
 Width=`tput co`
 Height=`tput li`
-SEARCH_PANES=true
+SEARCH_PANES=false
 COMMAND_FILE="$ROOT/commands.list"
 PID=$$
 declare -a command_buffs
@@ -11,17 +11,17 @@ line_counter=0
 saved_query=
 saved_mode=
 same=
-COLOR=1
-try_other=false
+if [ -t 1 ]; then
+  COLOR=2
+  prompt_color="$Yellow"
+else
+  COLOR=0
+  prompt_color=
+  Color_Off=
+fi
 curr_mode=0
-prompt_color="$Yellow"
-#declare -A escaped_queries
-#if [ -n "${escaped_queries["q$query"]}" ]; then
-#  q="${escaped_queries["q$query"]}"
-#else
-#  q=$( prepare_q "$query" )
-#  escaped_queries["q$query"]="${q}"
-#fi
+do_not_clear=false
+tput sc
 
 function read_char {
   read -s -n 1 c
@@ -31,8 +31,10 @@ function read_char {
 function init {
   if ! $debug; then
     stty -echo
-    tput clear
-    tput civis
+    if ! $do_not_clear; then
+      tput clear
+      tput civis
+    fi
   fi
   matches=
   cursor=0
@@ -52,9 +54,15 @@ function ac_lines {
   echo
 }
 
-function quit {
+function return_to_normal {
+  tput rc
+  clear_end_of_screen
   stty echo
   tput cnorm
+}
+
+function quit {
+  return_to_normal
   exit $1
 }
 
@@ -83,7 +91,11 @@ function prepare_q {
 
 function tick {
   if ! $debug; then
-    tput cup 0 0
+    if $do_not_clear; then
+      tput rc
+    else
+      tput cup 0 0
+    fi
   fi
 
   query=${1,,}
@@ -100,9 +112,11 @@ function tick {
 
   if [ "$mode_count" = "+" ]; then
     curr_mode=$(( (curr_mode + 1) % 4 ))
+    cursor=0
   elif [ "$mode_count" = "-" ]; then
     curr_mode=$(( (curr_mode - 1) % 4 ))
     curr_mode=$(( (curr_mode < 0) ? (4 + curr_mode) : curr_mode ))
+    cursor=0
   fi
 
   if [ -z "$same" ]; then
@@ -121,9 +135,7 @@ function tick {
 
   if [ $nbr_of_windows -eq 1 -a $curr_mode -eq 0 ]; then
     curr_mode=1
-  #elif $try_other && [ -z "$query" -a $curr_mode -eq 1 ]; then
-  #  try_other=false
-  #  curr_mode=0
+    cursor=0
   fi
 
   if ! $same && [ $curr_mode = 0 ]; then
@@ -197,9 +209,7 @@ function tick {
     done <<< "$matches" < <( echo "$all_windows" )
     if [ ${#matches} -eq 0 ]; then
       curr_mode=1
-      try_other=true
-    else
-      try_other=false
+      cursor=0
     fi
   fi
 
@@ -263,6 +273,7 @@ function tick {
     readarray -t sorted < <(for a in $matches; do echo "$a"; done )
   fi
 
+  q=$( prepare_q "$query" )
   for counter in "${!sorted[@]}"; do
     if [ $counter -gt $(( Height - 3 )) ] ; then
       continue
@@ -282,7 +293,7 @@ function tick {
       color="$Blue"
     fi
 
-    if [ $curr_mode  = 0 ]; then
+    if [ $curr_mode = 0 ]; then
       window_name=${window_names[win_counter]}
       len=$(( ${#buffs[win_counter]} ))
       snippet_len=$(( $len > 50 ? 50 : $len ))
@@ -298,7 +309,6 @@ function tick {
 
     $debug && debug_msg=" (debug: ${matchness}) "
     if [[ $COLOR = 2 ]]; then
-      q=$( prepare_q "$query" )
       line="${color}${caret}"`echo -e "${debug_msg}${window_index}${window_name}" | sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`"${Color_Off}"
     elif [[ $COLOR = 1 ]]; then
       line="${color}${caret}${debug_msg}${window_index}${window_name}${Color_Off}"
@@ -331,15 +341,17 @@ function tick {
 
     if $selected; then
       if [ "$counter" = "$cursor" ]; then
-        if [ $curr_mode  = 0 ]; then
+        if [ $curr_mode = 0 ]; then
           wm_select_window $window_address
           quit 0
-        elif [ $curr_mode  = 1 ]; then
+        elif [ $curr_mode = 1 ]; then
           line="${command_buffs[win_counter]}"
           name=${line%:*}
           cmd=$( echo ${line#*:} | sed -e 's/^ *//g' || true )
-          wm_new_window "$name" "$cmd"
-          quit 0
+          return_to_normal
+          wm_run_command "$name" "$cmd"
+          echo "$cmd"
+          exit 0
         fi
       fi
     fi

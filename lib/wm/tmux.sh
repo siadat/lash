@@ -69,13 +69,23 @@ function wm_send_keys {
 # is the previously selected window
 #
 function wm_list_windows {
-
   session_address=$1
 
   while read line; do
     line="${line/>[^-]:/1:}"
     echo "${line/>-:/0:}"
   done < <( tmux list-windows -F ">#{window_flags}:#{window_index}:#{window_name}" -t $session_address  ) | sort -n | sed -e 's/^[0-9]://g'
+}
+
+# Run cmd
+#
+# $0 $name [$cmd]
+#
+function wm_run_command {
+  name="$1"
+  cmd="$2"
+
+  wm_new_window "$name" "$cmd"
 }
 
 # Echo address of current session
