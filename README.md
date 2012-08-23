@@ -1,13 +1,18 @@
-A __window__ and __pane__ finder for complex Tmux sessions, inspired by [ctrlp](https://github.com/kien/ctrlp.vim/).
+A shell launcher and window finder for Tmux, inspired by [ctrlp](https://github.com/kien/ctrlp.vim/).
 
 ![Screenshot](http://i.imgur.com/cv55F.png)
 
 ### Install
+Just run
+``` bash
+$ ./f.sh
+```
+Optionally, add a tmux binding:
 ``` bash
 $ ./install.sh tmux M-Tab
 ```
-* Change M-Tab to whatever key binding you prefer
 * The install script adds a few lines to your `~/.tmux.conf`
+* Change M-Tab to whatever key binding you prefer
 * __Enable Meta key in OSX Terminal__: `Preferences > Settings > Keyboard > Use option as meta key`
 * __Enable Meta key in iTerm__: `Preferences > Profiles > Your profile > Left Keys > Left option key acts as __+Esc__`
 

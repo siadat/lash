@@ -5,6 +5,10 @@ ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LIB="${ROOT}/lib"
 WM=$1
 
+if [ -z "$WM" ]; then
+  WM='bash'
+fi
+
 if [ -e "$LIB/colors.sh" ]; then
   source "$LIB/colors.sh"
 else
