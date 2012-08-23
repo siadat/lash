@@ -35,17 +35,16 @@ init
 
 mode_selected=false
 redraw=false
-mode_count=0
 
 while true; do
 
   if $redraw || $mode_counter > 0 || $mode_selected || [ "$saved_query" != "$query" -o "$saved_cursor" != "$cursor" ]; then
-    tput cup 0 0
     tick "$query" $mode_selected $mode_count
     saved_query="$query"
     saved_cursor="$cursor"
   fi
 
+  mode_count=
   mode_selected=false
   IFS= read -s -n 1 c
   code=`printf '%d' "'$c'"`
@@ -57,7 +56,8 @@ while true; do
     mode_selected=true
 
   elif [ "$code" = "9" ]; then # Tab
-    mode_count=$(( (mode_count + 1) % 4 ))
+    #mode_count=$(( (mode_count + 1) % 4 ))
+    mode_count='+'
 
   elif [ "$code" = "27" ]; then # Escape
     code2=`read_char`
@@ -77,8 +77,9 @@ while true; do
       cursor=$(( cursor > 0 ? cursor - 1 : 0 ))
 
     elif [ "$code $code2 $code3" = "27 91 90" ]; then # Shift-Tab
-      mode_count=$(( (mode_count - 1) % 4 ))
-      mode_count=$(( (mode_count < 0) ? (4 + mode_count) : mode_count ))
+      mode_count='-'
+      # mode_count=$(( (mode_count - 1) % 4 ))
+      # mode_count=$(( (mode_count < 0) ? (4 + mode_count) : mode_count ))
 
     else
       quit 0

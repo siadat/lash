@@ -72,7 +72,10 @@ function wm_list_windows {
 
   session_address=$1
 
-  tmux list-windows -F "#{window_index}:#{window_name}" -t $session_address 
+  while read line; do
+    line="${line/>[^-]:/1:}"
+    echo "${line/>-:/0:}"
+  done < <( tmux list-windows -F ">#{window_flags}:#{window_index}:#{window_name}" -t $session_address  ) | sort -n | sed -e 's/^[0-9]://g'
 }
 
 # Echo address of current session
