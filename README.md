@@ -7,7 +7,7 @@ Just run
 ``` bash
 $ ./f.sh
 ```
-Optionally, add a tmux binding:
+Optionally, to add a tmux binding:
 ``` bash
 $ ./install.sh tmux M-Tab
 ```
@@ -17,13 +17,13 @@ $ ./install.sh tmux M-Tab
 * __Enable Meta key in iTerm__: `Preferences > Profiles > Your profile > Left Keys > Left option key acts as __+Esc__`
 
 ### Usage
-* __open__: Press M-Tab (or your preferred binding) to start fmux
+* __open__: Press M-Tab (or your preferred binding)
 * __search__: Type any part of the window title, e.g. type `pj` to find your `project` window
 * __select__: Press the RETURN key
 * __new window__: Press Tab to create a new window
 * __command mode__: Press Tab-Tab to go to command mode
 * __rename window__: Press Tab-Tab-Tab to rename current window
-* __close__: CTRL-c to close fmux
+* __close__: CTRL-c to close
 
 ### Contribute
 * Feedbacks, bug reports, and patches are highly appreciated

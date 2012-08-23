@@ -12,7 +12,7 @@ saved_query=
 saved_mode=
 same=
 if [ -t 1 ]; then
-  COLOR=2
+  COLOR=1
   prompt_color="$Yellow"
 else
   COLOR=0
@@ -309,11 +309,11 @@ function tick {
 
     $debug && debug_msg=" (debug: ${matchness}) "
     if [[ $COLOR = 2 ]]; then
-      line="${color}${caret}"`echo -e "${debug_msg}${window_index}${window_name}" | sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`"${Color_Off}"
+      line="${color}${caret}"`echo -e "${debug_msg}${window_index} ${window_name}" | sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`"${Color_Off}"
     elif [[ $COLOR = 1 ]]; then
-      line="${color}${caret}${debug_msg}${window_index}${window_name}${Color_Off}"
+      line="${color}${caret}${debug_msg}${window_index} ${window_name}${Color_Off}"
     else
-      line="${caret}${debug_msg}${window_index}${window_name}"
+      line="${caret}${debug_msg}${window_index} ${window_name}"
     fi
 
     if [ $curr_mode = 0 ]; then
