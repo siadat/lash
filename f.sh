@@ -3,10 +3,18 @@ Height=`tput li`
 
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LIB="${ROOT}/lib"
-WM=$1
 
-if [ -z "$WM" ]; then
-  WM='bash'
+wm_flag=$1
+debug_flag=$2
+
+if [ -z "$debug_flag" ]; then
+  debug=false
+else
+  debug=true
+fi
+
+if [ -z "$wm_flag" ]; then
+  wm_flag='bash'
 fi
 
 if [ -e "$LIB/colors.sh" ]; then
@@ -16,10 +24,10 @@ else
   exit 1
 fi
 
-if [ -e "$LIB/wm/$WM.sh" ]; then
-  source "$LIB/wm/$WM.sh"
+if [ -e "$LIB/wm/$wm_flag.sh" ]; then
+  source "$LIB/wm/$wm_flag.sh"
 else
-  read -p "> Could not find $LIB/wm/$WM.sh"
+  read -p "> Could not find $LIB/wm/$wm_flag.sh"
   exit 1
 fi
 
@@ -32,6 +40,7 @@ fi
 
 
 if [ $(( $( ps | grep -wv $PID | grep "$0" | wc -l ) )) -gt 2 ]; then
+  read -p "> Already running?"
   exit 1
 fi
 
@@ -60,7 +69,6 @@ while true; do
     mode_selected=true
 
   elif [ "$code" = "9" ]; then # Tab
-    #mode_count=$(( (mode_count + 1) % 4 ))
     mode_count='+'
 
   elif [ "$code" = "27" ]; then # Escape
@@ -75,15 +83,13 @@ while true; do
     if [ "$code $code2 $code3" = "27 91 66" ]; then # Down
       nbr_of_matches=`echo "$matches" |wc -w`
       cursor=$(( cursor + 2 > nbr_of_matches ? nbr_of_matches - 1 : cursor + 1 ))
-      cursor=$(( cursor + 3 > Height ? Height - 3 : cursor ))
+      cursor=$(( cursor + 3 > Height ? Height - 2 : cursor ))
 
     elif [ "$code $code2 $code3" = "27 91 65" ]; then # Up
       cursor=$(( cursor > 0 ? cursor - 1 : 0 ))
 
     elif [ "$code $code2 $code3" = "27 91 90" ]; then # Shift-Tab
       mode_count='-'
-      # mode_count=$(( (mode_count - 1) % 4 ))
-      # mode_count=$(( (mode_count < 0) ? (4 + mode_count) : mode_count ))
 
     else
       quit 0

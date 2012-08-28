@@ -7,6 +7,10 @@ function wm_new_window {
   name=$1
   script=$2
 
+  if [ -n "$script" ] ; then
+    script="$script ; read -n 1 -p End"
+  fi
+
   if [ -n "$name" ]; then
     tmux new-window -n "$name" "$script"
     tmux set-window-option allow-rename off
@@ -73,7 +77,7 @@ function wm_list_windows {
 
   while read line; do
     line="${line/>[^-]:/1:}"
-    echo "${line/>-:/0:}"
+    echo "${line/>[^:]:/0:}"
   done < <( tmux list-windows -F ">#{window_flags}:#{window_index}:#{window_name}" -t $session_address  ) | sort -n | sed -e 's/^[0-9]://g'
 }
 

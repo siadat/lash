@@ -9,6 +9,7 @@
 # programming: cd ~/programming/ && zsh
 
 ping: ping 4.2.2.4
-show calendar: cal 2012 && read
+show calendar: cal 2012
 programming: cd ~/programming/ && zsh -i
 tmux rc: vim ~/.tmux.conf && tmux source-file ~/.tmux.conf
+update: brew update
