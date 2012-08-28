@@ -224,19 +224,12 @@ function tick {
 
     if [ ${#command_buffs} -eq 0 ]; then
 
-      if [ ! -e "$COMMAND_FILE1" ]; then
-        COMMAND_FILE1=
-      fi
-      if [ ! -e "$COMMAND_FILE2" ]; then
-        COMMAND_FILE2=
-      fi
-
       while read line; do
         if [ -n "$( echo "$line" | sed -e 's/\s*#.*//g' | sed -e 's/^ *//g' )" ]; then
           command_buffs[$i]="$line"
           i=$(( i + 1 ))
         fi
-      done < "$COMMAND_FILE1"
+      done < <( [[ -e "$COMMAND_FILE1" ]] && cat "$COMMAND_FILE1" ; [[ -e "$COMMAND_FILE2" ]] && cat "$COMMAND_FILE2" )
     fi
 
     prompt="${prompt_color}:>${Color_Off}"
@@ -252,7 +245,7 @@ function tick {
       g2=0
 
       if [[ "$name" =~ $q ]]; then
-        g1="${BASH_REMATCH[0]}"
+        g1="${#BASH_REMATCH[0]}"
         g1=$(( 10000 - (g1 - ${#query}) ))
       fi
 
