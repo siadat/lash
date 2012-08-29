@@ -12,7 +12,7 @@ saved_query=
 saved_mode=
 same=
 if [ -t 1 ]; then
-  COLOR=1
+  COLOR=2
   prompt_color="$Yellow"
 else
   COLOR=0
@@ -90,7 +90,8 @@ function lecho {
 function prepare_q {
   # TODO escape regular expression
   q="${1//+/}"
-  q=$( echo "$q" |sed -e 's/\(.\)/[^\1]*\1/g')
+  q="${q//!/}"
+  q=$( echo "$q" |sed -e 's/\(.\)/[^\1]*\1/g' )
   echo "${q:5}"
 }
 
@@ -225,7 +226,7 @@ function tick {
           command_buffs[$i]="$line"
           i=$(( i + 1 ))
         fi
-      done < <( [[ -e "$COMMAND_FILE1" ]] && cat "$COMMAND_FILE1" ; [[ -e "$COMMAND_FILE2" ]] && cat "$COMMAND_FILE2" )
+      done < <( cat "$COMMAND_FILE1" "$COMMAND_FILE2" 2> /dev/null ; cat ~/.bash_history ~/.fish_history ~/.zsh_history 2> /dev/null | tail -20 | sed -e 's///g' | sed -e 's/[ 0-9:;]*/hist: /' )
     fi
 
     prompt="${prompt_color}c:${Color_Off}"
@@ -233,7 +234,7 @@ function tick {
     q=$( prepare_q "$query" )
     for _win_counter in "${!command_buffs[@]}"; do
       line=${command_buffs[_win_counter]}
-      name=${line%:*}
+      name=${line/:*/}
       cmd=${line#*:}
 
       if [[ "$name" =~ $q ]]; then
@@ -312,7 +313,7 @@ function tick {
       snippet=${buffs[win_counter]:$len - $snippet_len}
     elif [ $curr_mode = 1 ]; then
       line="${command_buffs[win_counter]}"
-      window_name=${line%:*}
+      window_name=${line/:*/:}
       snippet=" \$${line#*:}"
       # len=$(( ${#buffs[win_counter]} ))
       # snippet_len=$(( $len > 50 ? 50 : $len ))
@@ -369,6 +370,13 @@ function tick {
       fi
     fi
   done
+
+  if $selected && [[ ${#sorted} = 0 ]]; then
+    echo 'hi'
+    wm_run_command "$query" "${query/!/}"
+    quit 0
+  fi
+
   line_counter=0
   clear_end_of_screen
 }
