@@ -156,6 +156,7 @@ function tick {
       window_address=$curr_sess:$window_index
 
       if [ "$curr_win" = "$window_address" ]; then
+        prompt="${prompt_color}[${window_name}] f:${Color_Off}"
         continue
       fi
 
