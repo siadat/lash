@@ -109,8 +109,9 @@ function tick {
   counter=0
 
   if [ -z "$curr_sess" -o -z "$curr_win" -o -z "$all_windows" -o -z "$nbr_of_windows" ]; then
-    curr_sess=`wm_current_session_address`
     curr_win=`wm_current_window_address`
+    curr_sess=${curr_win%:*}
+    #curr_sess=`wm_current_session_address`
     all_windows=$( wm_list_windows $curr_sess )
     nbr_of_windows=$( echo "$all_windows" |wc -l )
   fi
@@ -162,27 +163,26 @@ function tick {
       fi
 
       pane_counter=0
-      if [ -z "${buffs[win_counter]}" ]; then
-        for line in `wm_list_panes $curr_sess:$window_index`; do
-          pane_index=${line%:*}
-          pane_address=$window_address.$pane_index
-
-          if $SEARCH_PANES; then
+      if $SEARCH_PANES; then
+        if [ -z "${buffs[win_counter]}" ]; then
+          for line in `wm_list_panes $curr_sess:$window_index`; do
+            pane_index=${line%:*}
+            pane_address=$window_address.$pane_index
             buff="`wm_pane_content $pane_address`"
-          else
-            buff=
-          fi
 
-          buffs[$win_counter]="${buffs[win_counter]} ${buff}"
-          pane_counter=$(( pane_counter + 1 ))
-        done
+            buffs[$win_counter]="${buffs[win_counter]} ${buff}"
+            pane_counter=$(( pane_counter + 1 ))
+          done
 
-        x=$(
-          echo "${buffs[win_counter]}" |tr -d '[\r\n]' |sed -e 's/  */ /g'
-        )
-        # To lower case
-        x=${x,,} || true
-        buffs[$win_counter]="x ${pane_counter} $x"
+          x=$(
+            echo "${buffs[win_counter]}" |tr -d '[\r\n]' |sed -e 's/  */ /g'
+          )
+          # To lower case
+          x=${x,,} || true
+          buffs[$win_counter]="x ${pane_counter} $x"
+        fi
+      else
+        buffs=
       fi
 
       found=
@@ -213,10 +213,6 @@ function tick {
       fi
       win_counter=$(( win_counter + 1 ))
     done <<< "$matches" < <( echo "$all_windows" )
-    # if [ ${#matches} -eq 0 ]; then
-    #   curr_mode=1
-    #   cursor=0
-    # fi
   fi
 
   if ! $same && [ $curr_mode -eq 1 ] ; then
@@ -239,19 +235,19 @@ function tick {
       line=${command_buffs[_win_counter]}
       name=${line%:*}
       cmd=${line#*:}
-      matchness=0
-
-      g1=0
-      g2=0
 
       if [[ "$name" =~ $q ]]; then
         g1="${#BASH_REMATCH[0]}"
         g1=$(( 10000 - (g1 - ${#query}) ))
+      else
+        g1=0
       fi
 
       if [[ "$cmd" =~ $q ]]; then
         g2="${#BASH_REMATCH[0]}"
         g2=$(( 1000 - (g2 - ${#query}) ))
+      else
+        g2=0
       fi
 
       matchness=$(( g1 + g2 ))
@@ -290,9 +286,6 @@ function tick {
     readarray -t sorted < <(for a in $matches; do echo "$a"; done )
   fi
 
-  # if [ -z "$q" ]; then
-  #   q=$( prepare_q "$query" )
-  # fi
   for counter in "${!sorted[@]}"; do
     if [ $counter -gt $(( Height - 2 )) ] ; then
       continue
