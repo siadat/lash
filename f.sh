@@ -1,5 +1,5 @@
 #!/usr/bin/env bash -e
-Height=`tput li`
+Height=`tput lines`
 
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LIB="${ROOT}/lib"

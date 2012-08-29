@@ -1,7 +1,7 @@
 #!/usr/bin/env bash -e
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
-Width=`tput co`
-Height=`tput li`
+Width=`tput cols`
+Height=`tput lines`
 SEARCH_PANES=false
 COMMAND_FILE1="$ROOT/lashrc"
 COMMAND_FILE2=~/.lashrc
@@ -44,7 +44,7 @@ function clear_end_of_screen {
   if $debug; then
     echo
   else
-    tput cd || tput ed || true
+    tput cd 2> /dev/null || tput ed
   fi
 }
 
@@ -138,14 +138,14 @@ function tick {
   saved_mode="$curr_mode"
 
 
-  # if [ $nbr_of_windows -eq 1 -a $curr_mode -eq 0 ]; then
-  #   curr_mode=1
-  #   cursor=0
-  # fi
+  if [ $nbr_of_windows -eq 1 -a $curr_mode -eq 0 ]; then
+    curr_mode=1
+    cursor=0
+  fi
 
   if ! $same && [ $curr_mode = 0 ]; then
     q=$( prepare_q "$query" )
-    prompt="${prompt_color}f>${Color_Off}"
+    prompt="${prompt_color}f:${Color_Off}"
     win_counter=0
 
     while read window_line ; do
@@ -232,7 +232,7 @@ function tick {
       done < <( [[ -e "$COMMAND_FILE1" ]] && cat "$COMMAND_FILE1" ; [[ -e "$COMMAND_FILE2" ]] && cat "$COMMAND_FILE2" )
     fi
 
-    prompt="${prompt_color}:>${Color_Off}"
+    prompt="${prompt_color}c:${Color_Off}"
 
     q=$( prepare_q "$query" )
     for _win_counter in "${!command_buffs[@]}"; do
@@ -265,11 +265,11 @@ function tick {
   fi
 
   if ! $same && [ $curr_mode = 2 ]; then
-    prompt="${prompt_color}N>${Color_Off}"
+    prompt="${prompt_color}n:${Color_Off}"
   fi
 
   if ! $same && [ $curr_mode = 3 ]; then
-    prompt="${prompt_color}R>${Color_Off}"
+    prompt="${prompt_color}r:${Color_Off}"
   fi
 
   if $selected && [ $curr_mode = 2 ] ; then
