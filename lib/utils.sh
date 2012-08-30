@@ -230,7 +230,7 @@ function tick {
       done < <( cat "$COMMAND_FILE1" "$COMMAND_FILE2" 2> /dev/null ; cat ~/.bash_history ~/.fish_history ~/.zsh_history 2> /dev/null | tail -20 | sed -e 's///g' | sed -e 's/[ 0-9:;]*/hist: /' )
     fi
 
-    prompt="${prompt_color}c:${Color_Off}"
+    prompt="${prompt_color}run:${Color_Off}"
 
     q=$( prepare_q "$query" )
     for _win_counter in "${!command_buffs[@]}"; do
@@ -263,11 +263,11 @@ function tick {
   fi
 
   if ! $same && [ $curr_mode = 2 ]; then
-    prompt="${prompt_color}n:${Color_Off}"
+    prompt="${prompt_color}new:${Color_Off}"
   fi
 
   if ! $same && [ $curr_mode = 3 ]; then
-    prompt="${prompt_color}r:${Color_Off}"
+    prompt="${prompt_color}rename:${Color_Off}"
   fi
 
   if $selected && [ $curr_mode = 2 ] ; then
