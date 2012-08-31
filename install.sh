@@ -15,12 +15,13 @@ else
 fi
 
 if [ "$wm" = "tmux" ]; then
-  echo "# Finder:"
+  echo "# Finder:" >> ~/.tmux.conf
   echo "bind-key -n $binding split-window -l 10 '$dir/f.sh ${wm}'" >> ~/.tmux.conf
   echo "set-option -g window-status-format ''" >> ~/.tmux.conf
   echo "set-option -g window-status-current-format ''" >> ~/.tmux.conf
-  echo
+  echo >> ~/.tmux.conf
   tmux source-file ~/.tmux.conf
+  echo "Bindings added to ~/.tmux.conf"
 else
   echo "Only tmux is supported at the moment."
   echo "But you could extend the supported window managers. To do that you would"
