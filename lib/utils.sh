@@ -227,7 +227,7 @@ function tick {
           command_buffs[$i]="$line"
           i=$(( i + 1 ))
         fi
-      done < <( cat "$COMMAND_FILE1" "$COMMAND_FILE2" 2> /dev/null ; cat ~/.bash_history ~/.fish_history ~/.zsh_history 2> /dev/null | tail -20 | sed -e 's///g' | sed -e 's/[ 0-9:;]*/hist: /' )
+      done < <( cat "$COMMAND_FILE1" "$COMMAND_FILE2" 2> /dev/null ; cat ~/.bash_history ~/.fish_history ~/.zsh_history 2> /dev/null | tail -50 | sed -e 's///g' | sed -e 's/[ 0-9:;]*/hist: /' )
     fi
 
     prompt="${prompt_color}run:${Color_Off}"
@@ -290,6 +290,13 @@ function tick {
 
   for counter in "${!sorted[@]}"; do
     if [ $counter -gt $(( Height - 2 )) ] ; then
+      continue
+    fi
+    if $same && [ $(( counter < cursor - 1 || counter > cursor + 1 )) -eq 1 ]; then
+      if ! [ $(( counter > Height - 3 )) -eq 1 ]; then
+        echo
+        line_counter=$(( line_counter + 1 ))
+      fi
       continue
     fi
     IFS='|' read -a arr <<< "${sorted[counter]}"
@@ -379,5 +386,7 @@ function tick {
   fi
 
   line_counter=0
-  clear_end_of_screen
+  if ! $same; then
+    clear_end_of_screen
+  fi
 }

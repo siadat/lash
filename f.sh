@@ -47,11 +47,10 @@ fi
 init
 
 mode_selected=false
-redraw=false
 
 while true; do
 
-  if $redraw || $mode_counter > 0 || $mode_selected || [ "$saved_query" != "$query" -o "$saved_cursor" != "$cursor" ]; then
+  if $mode_selected || [ "$saved_query" != "$query" -o "$saved_cursor" != "$cursor" ]; then
     tick "$query" $mode_selected $mode_count
     saved_query="$query"
     saved_cursor="$cursor"
