@@ -3,15 +3,11 @@ A shell launcher and window finder for Tmux, inspired by [ctrlp](https://github.
 ![Screenshot](http://i.imgur.com/cv55F.png)
 
 ### Install
-Just run
-``` bash
-$ ./f.sh
-```
-Optionally, to add a tmux binding:
 ``` bash
 $ ./install.sh tmux M-Tab
 ```
-* The install script adds a few lines to your `~/.tmux.conf`
+
+* The installation script adds a Tmux keyboard binding to your `~/.tmux.conf` to execute `./f.sh`.
 * Change M-Tab to whatever key binding you prefer
 * __Enable Meta key in OSX Terminal__: `Preferences > Settings > Keyboard > Use option as meta key`
 * __Enable Meta key in iTerm__: `Preferences > Profiles > Your profile > Left Keys > Left option key acts as __+Esc__`
