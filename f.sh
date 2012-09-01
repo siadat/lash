@@ -38,8 +38,9 @@ else
   exit 1
 fi
 
-
-if [ $(( $( ps | grep -wv $PID | grep "$0" | wc -l ) )) -gt 2 ]; then
+file_regex="[${0:0:1}]${0:1}"
+processes=$( ps | grep "$file_regex" | grep -vw "$$" )
+if [ $(( $( echo "$processes" | wc -l ) > 1 )) -eq 1 ]; then
   read -p "> Already running?"
   exit 1
 fi
