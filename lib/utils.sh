@@ -3,6 +3,7 @@ ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 Width=`tput cols`
 Height=`tput lines`
 SEARCH_PANES=false
+SEARCH_HISTORY=false
 COMMAND_FILE1="$ROOT/lashrc"
 COMMAND_FILE2=~/.lashrc
 PID=$$
@@ -227,7 +228,7 @@ function tick {
           command_buffs[$i]="$line"
           i=$(( i + 1 ))
         fi
-      done < <( cat "$COMMAND_FILE1" "$COMMAND_FILE2" 2> /dev/null ; cat ~/.bash_history ~/.fish_history ~/.zsh_history 2> /dev/null | tail -50 | sed -e 's///g' | sed -e 's/[ 0-9:;]*/hist: /' )
+      done < <( cat "$COMMAND_FILE1" "$COMMAND_FILE2" 2> /dev/null ; if $SEARCH_HISTORY; then cat ~/.bash_history ~/.fish_history ~/.zsh_history 2> /dev/null | tail -50 | sed -e 's///g' | sed -e 's/[ 0-9:;]*/hist: /'; fi )
     fi
 
     prompt="${prompt_color}run:${Color_Off}"
@@ -329,10 +330,11 @@ function tick {
     fi
 
     $debug && debug_msg=" (debug: ${matchness}) "
-    if [[ $COLOR = 2 ]]; then
-      line="${color}${caret}"`echo -e "${debug_msg}${window_index} ${window_name} " | sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`"${Color_Off}"
-    elif [[ $COLOR = 1 ]]; then
+
+    if [[ -z "$query" || $COLOR = 1 ]]; then
       line="${color}${caret}${debug_msg}${window_index} ${window_name} ${Color_Off}"
+    elif [[ $COLOR = 2 ]]; then
+      line="${color}${caret}"`echo -e "${debug_msg}${window_index} ${window_name} " | sed -e "s/\($q\)/$Yellow\1$Color_Off${color}/g" || true`"${Color_Off}"
     else
       line="${caret}${debug_msg}${window_index} ${window_name} "
     fi
@@ -351,7 +353,7 @@ function tick {
         line+=`echo -e " "`
       fi
     else
-      if [[ $COLOR = 2 ]]; then
+      if [[ -n "$query" && $COLOR = 2 ]]; then
         line+=`echo -e "$snippet" | sed -e "s/\($q\)/$Yellow\1$Color_Off/g"`
       else
         line+="$snippet"
