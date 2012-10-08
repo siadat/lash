@@ -67,6 +67,9 @@ while true; do
   if [ "$code" = "127" ]; then # Backspace
     query=${query%?}
 
+  elif [ "$code" = "21" ]; then # C-u
+    query=""
+
   elif [ "$code" = "39" ]; then # Enter
     mode_selected=true
 
