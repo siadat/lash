@@ -105,7 +105,12 @@ function tick {
     fi
   fi
 
-  query=${1,,}
+
+  if [ ${BASH_VERSINFO[0]} -gt 3 ]; then
+    query=${1,,}
+  else
+    query=$1
+  fi
   selected=$2
   mode_count=$3
   counter=0
@@ -284,10 +289,15 @@ function tick {
   lecho "$line"
 
   if [ -n "$query" ] ; then
-    readarray -t sorted < <(for a in $matches; do echo "$a"; done | sort -rn )
+    filter="sort -rn"
   else
-    readarray -t sorted < <(for a in $matches; do echo "$a"; done )
+    filter="cat"
   fi
+
+  unset sorted
+  while IFS= read -r; do
+    sorted+=("$REPLY")
+  done < <(for a in $matches; do echo "$a"; done | $filter )
 
   for counter in "${!sorted[@]}"; do
     if [ $counter -gt $(( Height - 2 )) ] ; then
