@@ -1,4 +1,5 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
+set -e
 Height=`tput lines`
 
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -39,8 +40,7 @@ else
 fi
 
 file_regex="[${0:0:1}]${0:1}"
-processes=$( ps | grep "$file_regex" | grep -vw "$$" )
-if [ $(( $( echo "$processes" | wc -l ) > 1 )) -eq 1 ]; then
+if pgrep -f "$file_regex" | grep -vw $$; then
   read -p "> Already running?"
   exit 1
 fi
