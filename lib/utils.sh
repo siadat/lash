@@ -157,7 +157,7 @@ function tick {
     win_counter=0
 
     while read window_line ; do
-      window_index=${window_line%:*}
+      window_index=${window_line%%:*}
       window_name=${window_line#*:}
       window_address=$curr_sess:$window_index
 
