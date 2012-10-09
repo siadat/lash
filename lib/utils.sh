@@ -186,7 +186,7 @@ function tick {
             echo "${buffs[win_counter]}" |tr -d '[\r\n]' |sed -e 's/  */ /g'
           )
           # To lower case
-          x=${x,,} || true
+          [ ${BASH_VERSINFO[0]} -gt 3 ] && x=${x,,}
           buffs[$win_counter]="x ${pane_counter} $x"
         fi
       else
