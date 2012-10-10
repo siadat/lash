@@ -105,7 +105,12 @@ function tick {
     fi
   fi
 
-  query=${1,,}
+
+  if [ ${BASH_VERSINFO[0]} -gt 3 ]; then
+    query=${1,,}
+  else
+    query=$1
+  fi
   selected=$2
   mode_count=$3
   counter=0
@@ -152,7 +157,7 @@ function tick {
     win_counter=0
 
     while read window_line ; do
-      window_index=${window_line%:*}
+      window_index=${window_line%%:*}
       window_name=${window_line#*:}
       window_address=$curr_sess:$window_index
 
@@ -181,7 +186,7 @@ function tick {
             echo "${buffs[win_counter]}" |tr -d '[\r\n]' |sed -e 's/  */ /g'
           )
           # To lower case
-          x=${x,,} || true
+          [ ${BASH_VERSINFO[0]} -gt 3 ] && x=${x,,}
           buffs[$win_counter]="x ${pane_counter} $x"
         fi
       else
@@ -284,10 +289,15 @@ function tick {
   lecho "$line"
 
   if [ -n "$query" ] ; then
-    readarray -t sorted < <(for a in $matches; do echo "$a"; done | sort -rn )
+    filter="sort -rn"
   else
-    readarray -t sorted < <(for a in $matches; do echo "$a"; done )
+    filter="cat"
   fi
+
+  unset sorted
+  while IFS= read -r; do
+    sorted+=("$REPLY")
+  done < <(for a in $matches; do echo "$a"; done | $filter )
 
   for counter in "${!sorted[@]}"; do
     if [ $counter -gt $(( Height - 2 )) ] ; then
