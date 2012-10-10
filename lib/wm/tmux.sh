@@ -9,6 +9,7 @@ function wm_new_window {
 
   if [ -n "$script" ] ; then
     script="$script ; read -n 1 -p End"
+    # script="$script ; read -n 1 -p 'End -- (r) to rerun or (q) to close.' key; "
   fi
 
   if [ -n "$name" ]; then
