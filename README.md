@@ -23,6 +23,6 @@ $ ./install.sh tmux M-Tab
 
 ### Contribute
 * Feedbacks, bug reports, and patches are highly appreciated
-* Tested with Tmux 1.6+, Bash 4.2.37, GNU Sed 4.2.1, BSD Sed (2005), BSD tr (2004), GNU tr from coreutils 8.17 and GNU Grep 2.5.1 on OSX and Gentoo
+* Tested with Tmux 1.6+, Bash 4.2 and 3.2, GNU Sed 4.2.1, BSD Sed (2005), BSD tr (2004), GNU tr from coreutils 8.17 and GNU Grep 2.5.1 on OSX and Gentoo. Requires pgrep.
 
 Copyrigh (c) 2012 Sina Siadat
