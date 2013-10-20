@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -e
 Height=`tput lines`
+base=$(dirname $0)
+pid_file="$base/tmp.pid"
+pid=$$
+
+# exit if already open
+kill -2 `cat $pid_file` && exit 0
+
+echo $pid > "$pid_file"
 
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LIB="${ROOT}/lib"
@@ -39,11 +47,6 @@ else
   exit 1
 fi
 
-file_regex="[${0:0:1}]${0:1}"
-if pgrep -f "$file_regex" | grep -vw $$; then
-  read -p "> Already running?"
-  exit 1
-fi
 
 init
 
