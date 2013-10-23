@@ -7,19 +7,21 @@ A shell launcher and window finder for Tmux, inspired by [ctrlp](https://github.
 $ ./install.sh tmux M-Tab
 ```
 
-* The installation script adds a Tmux keyboard binding to your `~/.tmux.conf` to execute `./f.sh`.
-* Change M-Tab to whatever key binding you prefer
-* __Enable Meta key in OSX Terminal__: `Preferences > Settings > Keyboard > Use option as meta key`
-* __Enable Meta key in iTerm__: `Preferences > Profiles > Your profile > Left Keys > Left option key acts as __+Esc__`
+#### Notes
+
+* The installation script appends a keyboard binding to your `~/.tmux.conf`
+* Change M-Tab to your prefered key binding
+* __How to enable Meta key in OSX Terminal__: `Settings > Keyboard > Use option as meta key`
+* __How to enable Meta key in iTerm__: `Your profile > Keys > Left option key acts as __+Esc__`
 
 ### Usage
-* __open__: Press M-Tab (or your preferred binding)
+* __open__: Press Meta-Tab (or your preferred binding)
 * __search__: Type any part of the window title, e.g. type `pj` to find your `project` window
 * __select__: Press the RETURN key
 * __new window__: Press Tab to create a new window
 * __command mode__: Press Tab-Tab to go to command mode
 * __rename window__: Press Tab-Tab-Tab to rename current window
-* __close__: CTRL-c to close
+* __close__: CTRL-c or double-ESC to close
 
 ### Contribute
 * Feedbacks, bug reports, and patches are highly appreciated
