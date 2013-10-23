@@ -11,8 +11,8 @@ $ ./install.sh tmux M-Tab
 
 * The installation script appends a keyboard binding to your `~/.tmux.conf`
 * Change M-Tab to your prefered key binding
-* __How to enable Meta key in OSX Terminal__: `Settings > Keyboard > Use option as meta key`
-* __How to enable Meta key in iTerm__: `Your profile > Keys > Left option key acts as __+Esc__`
+* How to enable Meta key in OSX Terminal: `Settings > Keyboard > Use option as meta key`
+* How to enable Meta key in iTerm: `Your profile > Keys > Left option key acts as __+Esc__`
 
 ### Usage
 * __open__: Press Meta-Tab (or your preferred binding)
