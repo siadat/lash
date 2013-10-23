@@ -7,6 +7,13 @@ SEARCH_HISTORY=false
 COMMAND_FILE1="$ROOT/lashrc"
 COMMAND_FILE2=~/.lashrc
 PID=$$
+
+MODE_FIND=0
+MODE_NEW=1
+MODE_RENAME=2
+MODE_RUN=3
+MODE_COUNT=4
+
 declare -a command_buffs
 line_counter=0
 saved_query=
@@ -20,7 +27,8 @@ else
   prompt_color=
   Color_Off=
 fi
-curr_mode=0
+
+curr_mode=$MODE_FIND
 do_not_clear=false
 tput sc
 
@@ -124,11 +132,11 @@ function tick {
   fi
 
   if [ "$mode_count" = "+" ]; then
-    curr_mode=$(( (curr_mode + 1) % 4 ))
+    curr_mode=$(( (curr_mode + 1) % MODE_COUNT ))
     cursor=0
   elif [ "$mode_count" = "-" ]; then
-    curr_mode=$(( (curr_mode - 1) % 4 ))
-    curr_mode=$(( (curr_mode < 0) ? (4 + curr_mode) : curr_mode ))
+    curr_mode=$(( (curr_mode - 1) % MODE_COUNT ))
+    curr_mode=$(( (curr_mode < 0) ? (MODE_COUNT + curr_mode) : curr_mode ))
     cursor=0
   fi
 
@@ -145,141 +153,33 @@ function tick {
   saved_query="$query"
   saved_mode="$curr_mode"
 
-
-  if [ $nbr_of_windows -eq 1 -a $curr_mode -eq 0 ]; then
-    curr_mode=1
+  if [ $nbr_of_windows -eq 1 -a $curr_mode -eq $MODE_FIND ]; then
+    curr_mode=$MODE_NEW
     cursor=0
   fi
 
-  if ! $same && [ $curr_mode = 0 ]; then
-    q=$( prepare_q "$query" )
-    prompt="${prompt_color}f:${Color_Off}"
-    win_counter=0
-
-    while read window_line ; do
-      window_index=${window_line%%:*}
-      window_name=${window_line#*:}
-      window_address=$curr_sess:$window_index
-
-      if [ "$curr_win" = "$window_address" ]; then
-        prompt="${prompt_color}[${window_name}] f:${Color_Off}"
-        continue
-      fi
-
-      if [ -z "${window_names[win_counter]}" ]; then
-        window_names[$win_counter]="${window_name}"
-      fi
-
-      pane_counter=0
-      if $SEARCH_PANES; then
-        if [ -z "${buffs[win_counter]}" ]; then
-          for line in `wm_list_panes $curr_sess:$window_index`; do
-            pane_index=${line%:*}
-            pane_address=$window_address.$pane_index
-            buff="`wm_pane_content $pane_address`"
-
-            buffs[$win_counter]="${buffs[win_counter]} ${buff}"
-            pane_counter=$(( pane_counter + 1 ))
-          done
-
-          x=$(
-            echo "${buffs[win_counter]}" |tr -d '[\r\n]' |sed -e 's/  */ /g'
-          )
-          # To lower case
-          [ ${BASH_VERSINFO[0]} -gt 3 ] && x=${x,,}
-          buffs[$win_counter]="x ${pane_counter} $x"
-        fi
-      else
-        buffs=
-      fi
-
-      found=
-      matchness=0
-      is_match=false
-      g1=false
-      g2=false
-
-      if [ -z "$query" ]; then
-        g1=true;
-        is_match=true
-      else
-        g1=$( echo "$window_name" |grep -oPi "$q" || true )
-        if $SEARCH_PANES; then
-          g2=$( echo "${buffs[win_counter]}" |grep -oPi "$query" || true )
-        else
-          g2=""
-        fi
-
-        matchness=$(( ${#g1} * 10000 + ${#g2} ))
-        if [ $matchness -gt 0 ]; then
-          is_match=true
-        fi
-      fi
-
-      if $is_match; then
-        matches="$matches $matchness|$window_address|dummypane|$win_counter|"
-      fi
-      win_counter=$(( win_counter + 1 ))
-    done <<< "$matches" < <( echo "$all_windows" )
+  if ! $same && [ $curr_mode = $MODE_FIND ]; then
+    source "$LIB/find.sh"
+    find_window
   fi
 
-  if ! $same && [ $curr_mode -eq 1 ] ; then
-    i=0
-
-    if [ ${#command_buffs} -eq 0 ]; then
-
-      while read line; do
-        if [ -n "$( echo "$line" | sed -e 's/\s*#.*//g' | sed -e 's/^ *//g' )" ]; then
-          command_buffs[$i]="$line"
-          i=$(( i + 1 ))
-        fi
-      done < <( cat "$COMMAND_FILE1" "$COMMAND_FILE2" 2> /dev/null ; if $SEARCH_HISTORY; then cat ~/.bash_history ~/.fish_history ~/.zsh_history 2> /dev/null | tail -50 | sed -e 's///g' | sed -e 's/[ 0-9:;]*/hist: /'; fi )
-    fi
-
-    prompt="${prompt_color}run:${Color_Off}"
-
-    q=$( prepare_q "$query" )
-    for _win_counter in "${!command_buffs[@]}"; do
-      line=${command_buffs[_win_counter]}
-      name=${line/:*/}
-      cmd=${line#*:}
-
-      if [[ "$name" =~ $q ]]; then
-        g1="${#BASH_REMATCH[0]}"
-        g1=$(( 10000 - (g1 - ${#query}) ))
-      else
-        g1=0
-      fi
-
-      if [[ "$cmd" =~ $q ]]; then
-        g2="${#BASH_REMATCH[0]}"
-        g2=$(( 1000 - (g2 - ${#query}) ))
-      else
-        g2=0
-      fi
-
-      matchness=$(( g1 + g2 ))
-
-      if [ $matchness -gt 0 -o "$q" = "" ]; then
-        window_address=$_win_counter
-        window_index=' '
-        matches="$matches $matchness|$window_address|dummypane|$_win_counter|$window_index"
-      fi
-    done <<< "$matches"
+  if ! $same && [ $curr_mode -eq $MODE_RUN ] ; then
+    source "$LIB/run.sh"
+    run_command
   fi
 
-  if ! $same && [ $curr_mode = 2 ]; then
-    prompt="${prompt_color}new:${Color_Off}"
+  if ! $same && [ $curr_mode = $MODE_NEW ]; then
+    prompt="${prompt_color}new:${Color_Off} "
   fi
 
-  if ! $same && [ $curr_mode = 3 ]; then
-    prompt="${prompt_color}rename:${Color_Off}"
+  if ! $same && [ $curr_mode = $MODE_RENAME ]; then
+    prompt="${prompt_color}rename:${Color_Off} "
   fi
 
-  if $selected && [ $curr_mode = 2 ] ; then
+  if $selected && [ $curr_mode = $MODE_NEW ] ; then
     wm_new_window "$query"
     quit 0
-  elif $selected && [ $curr_mode = 3 ] ; then
+  elif $selected && [ $curr_mode = $MODE_RENAME ] ; then
     wm_rename_window "$curr_win" "$query"
     quit 0
   fi
@@ -325,12 +225,12 @@ function tick {
       color="$Blue"
     fi
 
-    if [ $curr_mode = 0 ]; then
+    if [ $curr_mode = $MODE_FIND ]; then
       window_name=${window_names[win_counter]}
       len=$(( ${#buffs[win_counter]} ))
       snippet_len=$(( $len > 50 ? 50 : $len ))
       snippet=${buffs[win_counter]:$len - $snippet_len}
-    elif [ $curr_mode = 1 ]; then
+    elif [ $curr_mode = $MODE_RUN ]; then
       line="${command_buffs[win_counter]}"
       window_name=${line/:*/:}
       snippet=" \$${line#*:}"
@@ -349,7 +249,7 @@ function tick {
       line="${caret}${debug_msg}${window_index} ${window_name} "
     fi
 
-    if [ $curr_mode = 0 ]; then
+    if [ $curr_mode = $MODE_FIND ]; then
 
       if $SEARCH_PANES; then
         if [ $matchness = 0 ]; then
@@ -374,13 +274,13 @@ function tick {
 
     if $selected; then
       if [ "$counter" = "$cursor" ]; then
-        if [ $curr_mode = 0 ]; then
+        if [ $curr_mode = $MODE_FIND ]; then
           wm_select_window $window_address
           quit 0
           # if [ -n "${window_address#*:}" ]; then
           #   tmux join-pane -t :${window_address#*:}
           # fi
-        elif [ $curr_mode = 1 ]; then
+        elif [ $curr_mode = $MODE_RUN ]; then
           line="${command_buffs[win_counter]}"
           name=${line%:*}
           cmd=$( echo ${line#*:} | sed -e 's/^ *//g' || true )

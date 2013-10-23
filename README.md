@@ -15,7 +15,13 @@ $ ./install.sh tmux M-Tab
 * How to enable Meta key in iTerm: `Your profile > Keys > Left option key acts as __+Esc__`
 
 ### Usage
-Press Meta-Tab to open. Press Tab to cycle through modes (search, run, new, and rename).
+
+Press Meta-Tab to open. Press Tab to cycle through modes:
+
+* find windows
+* new window
+* rename window
+* run a command -- see `lashrc` file
 
 ### Contribute
 * Feedbacks, bug reports, and patches are highly appreciated
