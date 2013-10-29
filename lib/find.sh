@@ -46,13 +46,13 @@ function find_window() {
       g1=false
       g2=false
 
-      if [ -z "$query" ]; then
-        g1=true;
+      if [ -z "$q" ]; then
+        g1=true
         is_match=true
       else
         g1=$( echo "$window_name" |grep -oPi "$q" || true )
         if $SEARCH_PANES; then
-          g2=$( echo "${buffs[win_counter]}" |grep -oPi "$query" || true )
+          g2=$( echo "${buffs[win_counter]}" |grep -oPi "$q" || true )
         else
           g2=""
         fi
