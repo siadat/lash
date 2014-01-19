@@ -6,7 +6,7 @@ pid_file="$base/tmp.pid"
 pid=$$
 
 # exit if already open
-kill -2 `cat $pid_file` > /dev/null && exit 0
+kill -2 `cat $pid_file` &> /dev/null && exit 0
 
 echo $pid > "$pid_file"
 
